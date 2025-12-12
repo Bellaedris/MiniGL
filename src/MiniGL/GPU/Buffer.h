@@ -72,14 +72,12 @@ public:
 
     #pragma region Methods
     /**
-     * \brief Binds the buffer to be able to use it. In most cases you won't need this since other class methods always
-     * call Bind() beforehand. It had to be used by VAO though, so it will remain public for now. We may change VAO to be
-     * a friend class of buffer, but I don't like it.
+     * \brief Binds the buffer to be able to use it. Must be called before any operation on the buffer
      */
     void Bind() const;
 
     /**
-     * \brief Populate a buffer with data
+     * \brief Populate a buffer with data. The buffer must be bound beforehand using the Bind() method
      * \param size Size of the data to allocate
      * \param data pointer to the data to allocate
      * \param usage How the data will be used. This is a hint and only helps the driver speedup things.

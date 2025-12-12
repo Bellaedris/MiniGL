@@ -19,7 +19,6 @@ namespace mgl::gpu
 
     void Buffer::Write(uint32_t size, void *data, BufferUsage usage)
     {
-        Bind();
         glNamedBufferData(m_buffer, size, data, GetBufferUsage(usage));
     }
 
