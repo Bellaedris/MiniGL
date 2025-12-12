@@ -13,28 +13,44 @@ namespace mgl::gpu
 class Shader
 {
 public:
+    #pragma region Enum
     enum ShaderType
     {
         VERTEX,
         FRAGMENT,
         COMPUTE
     };
-    #pragma endregion InnerStructs
+    #pragma endregion Enum
 
 private:
     #pragma region Members
     uint32_t m_program;
-    std::vector<std::string> m_shadersList;
     #pragma endregion Members
 
     GLuint GetShaderType(ShaderType type);
-    #pragma region InnerStructs
-
 public:
+    /**
+     * \brief Creates an OpenGL program
+     */
     Shader();
 
-    void AddShaderFromFile(ShaderType type, const char* file);
+    #pragma region Methods
+    /**
+     * \brief Add a shader to the shader program
+     * \param type The kind of shader to add. Only supports Vertex, Fragment and Compute for the moment
+     * \param path Path to the shader. Remember that by default, the runtime's root is where the exe is located, so PATH/TO/PROJECT/bin
+     */
+    void AddShaderFromFile(ShaderType type, const char* path);
+
+    /**
+     * \brief Finalizes the creation of the shader after adding all the individual shaders we wanted.
+     */
     void Create();
+
+    /**
+     * \brief Bind the shader for use
+     */
     void Bind();
+    #pragma endregion Methods
 };
 } // mgl

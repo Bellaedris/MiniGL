@@ -12,12 +12,12 @@ namespace mgl::gpu
         : m_program(glCreateProgram())
     {}
 
-    void Shader::AddShaderFromFile(Shader::ShaderType type, const char *file)
+    void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
     {
-        std::optional<std::string> shaderData = utils::FileUtils::read_file(file);
+        std::optional<std::string> shaderData = utils::FileUtils::read_file(path);
         if(shaderData.has_value() == false)
         {
-            std::cerr << "Couldn't open file " << file << "\n";
+            std::cerr << "Couldn't open file " << path << "\n";
             return;
         }
 
@@ -34,7 +34,7 @@ namespace mgl::gpu
         if (!success)
         {
             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            std::cout << "error compiling shaders at " << file << ": " << infoLog << std::endl;
+            std::cout << "error compiling shaders at " << path << ": " << infoLog << std::endl;
         }
 
         glAttachShader(m_program, shader);
