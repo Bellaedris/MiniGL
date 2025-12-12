@@ -25,11 +25,15 @@ public:
     /**
      * \brief Binds the VAO for usage
      */
-    void Bind();
+    void Bind() const;
 
     /**
-     * \brief Binds a buffer and create an attribute
-     * \param buffer The buffer where we want to create an attribute
+     * \brief Unbinds the VAO
+     */
+    void Unbind() const;
+
+    /**
+     * \brief Create an attribute for this VAO
      * \param location Attribute location, that will be used in a shader
      * \param type Data Type @see GLUtils::DataType
      * \param offset Offset from the beginning of the buffer
@@ -46,6 +50,6 @@ public:
      * The first method has the advantage of faster memory access, since every vertex has all its data contiguous in memory.
      * The second method is conceptually simpler but a bit slower (this shouldn't be very noticeable honestly, but benchmark it!)
      */
-    void SetAttribute(const Buffer& buffer, uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride);
+    void SetAttribute(uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride);
 };
 } // mgl::gpu

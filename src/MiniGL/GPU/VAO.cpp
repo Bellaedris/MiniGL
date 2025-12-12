@@ -11,15 +11,18 @@ namespace mgl::gpu
         glGenVertexArrays(1, &m_vao);
     }
 
-    void Vao::Bind()
+    void Vao::Bind() const
     {
         glBindVertexArray(m_vao);
     }
 
-    void Vao::SetAttribute(const Buffer& buffer, uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride)
+    void Vao::Unbind() const
     {
-        buffer.Bind();
-        Bind();
+        glBindVertexArray(0);
+    }
+
+    void Vao::SetAttribute(uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride)
+    {
         glEnableVertexAttribArray(location);
         glVertexAttribPointer(location, tupleSize, GLUtils::GetDataType(type), GL_FALSE, stride, (void*)offset);
     }
