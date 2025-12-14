@@ -5,6 +5,8 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <stdexcept>
+#include <iostream>
 
 namespace mgl::gpu
 {
@@ -50,6 +52,9 @@ namespace mgl::gpu
                     return GL_UNSIGNED_INT;
                 case DataType::Double:
                     return GL_DOUBLE;
+                default:
+                    std::cerr << "Invalid data type";
+                    return GL_FALSE;
             }
         }
     };

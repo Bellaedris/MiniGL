@@ -44,6 +44,9 @@ namespace mgl::gpu
                 return GL_STREAM_COPY;
             case BufferUsage::STREAM_READ:
                 return GL_STREAM_READ;
+            default:
+                std::cerr << "Invalid buffer usage";
+                return GL_FALSE;
         }
     }
 
@@ -55,6 +58,9 @@ namespace mgl::gpu
                 return GL_ARRAY_BUFFER;
             case BufferType::Index:
                 return GL_ELEMENT_ARRAY_BUFFER;
+            default:
+                std::cerr << "Invalid buffer type";
+                return GL_FALSE;
         }
     }
 } // mgl::gpu
