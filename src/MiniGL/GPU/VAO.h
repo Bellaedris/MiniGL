@@ -50,6 +50,6 @@ public:
      * The first method has the advantage of faster memory access, since every vertex has all its data contiguous in memory.
      * The second method is conceptually simpler but a bit slower (this shouldn't be very noticeable honestly, but benchmark it!)
      */
-    void SetAttribute(uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride);
+    void SetAttribute(int location, GLUtils::DataType type, int offset, int tupleSize, int stride);
 };
 } // mgl::gpu

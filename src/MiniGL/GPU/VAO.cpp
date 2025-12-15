@@ -21,7 +21,7 @@ namespace mgl::gpu
         glBindVertexArray(0);
     }
 
-    void Vao::SetAttribute(uint32_t location, GLUtils::DataType type, uint32_t offset, uint32_t tupleSize, uint32_t stride)
+    void Vao::SetAttribute(int location, GLUtils::DataType type, int offset, int tupleSize, int stride)
     {
         glEnableVertexAttribArray(location);
         glVertexAttribPointer(location, tupleSize, GLUtils::GetDataType(type), GL_FALSE, stride, (void*)offset);
