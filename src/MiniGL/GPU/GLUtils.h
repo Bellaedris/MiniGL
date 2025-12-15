@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <iostream>
 
+#include <glm/glm.hpp>
+
 namespace mgl::gpu
 {
     /**
@@ -56,6 +58,27 @@ namespace mgl::gpu
                     std::cerr << "Invalid data type";
                     return GL_FALSE;
             }
+        }
+
+        static void ClearColor(const glm::vec4& color)
+        {
+            glClearColor(color.r, color.g, color.b, color.a);
+        }
+
+        /**
+         * \brief Clears the currently bound framebuffer
+         */
+        static void Clear()
+        {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        static void SetDepthTesting(bool value)
+        {
+            if(value)
+                glEnable(GL_DEPTH_TEST);
+            else
+                glDisable(GL_DEPTH_TEST);
         }
     };
 }
