@@ -62,6 +62,9 @@ namespace mgl::gpu
                 return GL_FRAGMENT_SHADER;
             case COMPUTE:
                 return GL_COMPUTE_SHADER;
+            default:
+                std::cerr << "Invalid shader type";
+                return GL_FALSE;
         }
     }
 

@@ -7,6 +7,8 @@
 #include <glad/glad.h>
 #include <vector>
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace mgl::gpu
 {
@@ -52,5 +54,52 @@ public:
      */
     void Bind();
     #pragma endregion Methods
+
+    #pragma region Uniform data
+    GLint GetLocation(const std::string &name) const
+    {
+        return glGetUniformLocation(m_program, name.c_str());
+    }
+
+    void UniformData(const std::string& name, const glm::mat4 mat) const
+    {
+        glUniformMatrix4fv(GetLocation(name), 1, false, glm::value_ptr(mat));
+    }
+
+    void UniformData(const std::string& name, const float x, const float y, const float z, const float w) const
+    {
+        glUniform4f(GetLocation(name), x, y, z, w);
+    }
+
+    void UniformData(const std::string& name, const glm::vec4& data) const
+    {
+        glUniform4f(GetLocation(name), data.x, data.y, data.z, data.w);
+    }
+
+    void UniformData(const std::string& name, const glm::vec3& data) const
+    {
+        glUniform3f(GetLocation(name), data.x, data.y, data.z);
+    }
+
+    void UniformData(const std::string& name, const glm::vec2& data) const
+    {
+        glUniform2f(GetLocation(name), data.x, data.y);
+    }
+
+    void UniformData(const std::string &name, const float x, const float y, const float z) const
+    {
+        glUniform3f(GetLocation(name), x, y, z);
+    }
+
+    void UniformData(const std::string& name, const float x) const
+    {
+        glUniform1f(GetLocation(name), x);
+    }
+
+    void UniformData(const std::string& name, const int x) const
+    {
+        glUniform1i(GetLocation(name), x);
+    }
+    #pragma endregion Uniform data
 };
 } // mgl
