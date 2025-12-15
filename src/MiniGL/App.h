@@ -4,8 +4,12 @@
 
 #pragma once
 
+#include <memory>
 #include "Window.h"
-#include "glm/glm.hpp"
+#include "Camera.h"
+#include "GPU/Shader.h"
+#include "Mesh.h"
+#include "Timer.h"
 
 namespace mgl
 {
@@ -14,17 +18,11 @@ namespace mgl
     private:
         Window m_window;
 
-        float vertices[12] = {
-                0.5f,  0.5f, 0.0f,  // top right
-                0.5f, -0.5f, 0.0f,  // bottom right
-                -0.5f, -0.5f, 0.0f,  // bottom left
-                -0.5f,  0.5f, 0.0f   // top left
-        };
+        gpu::Shader s;
+        std::vector<Mesh> m_meshes;
+        std::unique_ptr<Camera> m_camera {nullptr};
 
-        unsigned int indices[6] = {  // note that we start from 0!
-                0, 1, 3,   // first triangle
-                1, 2, 3    // second triangle
-        };
+        Timer<std::chrono::seconds> m_deltaTimer;
 
         /**
          * \brief Initializes the application
