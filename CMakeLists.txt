@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 project(MiniGL)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
@@ -21,7 +21,7 @@ file(GLOB_RECURSE SOURCES
 
 add_executable(MiniGL ${SOURCES})
 
-find_package(GLM REQUIRED)
+find_package(GLM CONFIG REQUIRED)
 message(STATUS "Found GLM in ${GLM_INCLUDE_DIR}")
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
@@ -33,14 +33,10 @@ if (OPENMP_FOUND)
 endif()
 
 add_library(GLAD thirdparty/glad.c)
-set(LIBS ${GLFW3_LIBRARY} ${OPENGL_LIBRARY} GLAD ${CMAKE_DL_LIBS})
+add_library(TINYOBJ thirdparty/tinyobjloader.cpp)
+add_library(STB_IMAGE thirdparty/stb_image.cpp)
+set(LIBS ${GLFW3_LIBRARY} ${OPENGL_LIBRARY} glm::glm GLAD ${CMAKE_DL_LIBS} STB_IMAGE TINYOBJ)
 
-#include_directories("${CMAKE_SOURCE_DIR}/includes")
-include_directories(
-        "${CMAKE_SOURCE_DIR}/src"
-        "${CMAKE_SOURCE_DIR}/includes"
-        "${CMAKE_SOURCE_DIR}/includes/glad"
-        "${CMAKE_SOURCE_DIR}/includes/glm"
-)
+include_directories("${CMAKE_SOURCE_DIR}/includes")
 
 target_link_libraries(MiniGL ${LIBS})
