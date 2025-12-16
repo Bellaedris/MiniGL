@@ -1,0 +1,95 @@
+//
+// Created by Bellaedris on 16/12/2025.
+//
+
+#pragma once
+
+#include <cstdint>
+#include <glad/glad.h>
+
+#include <stb/stb_image.h>
+
+#include "GLUtils.h"
+
+namespace mgl::gpu
+{
+/**
+ * \brief Wraps OpenGL 2D textures creation
+ */
+class Texture
+{
+    #pragma region Enums
+public:
+    /**
+     * \brief Different texture targets we can bind to. We only handle 2D textures and Cubemaps for now. @see
+     */
+    enum TextureTarget
+    {
+        Target2D,
+        TargetCubemap
+    };
+
+    /**
+     * \brief How to handle UVs overflow. See https://registry.khronos.org/OpenGL-Refpages/gl4/html/glTexParameter.xhtml,
+     * section "GL_TEXTURE_WRAP_XXX"
+     */
+    enum WrapMode
+    {
+        Repeat,
+        RepeatMirror,
+        ClampToEdge,
+        ClampToBorder
+    };
+
+    enum Filtering
+    {
+        Nearest,
+        Linear,
+        NearestMipMapNearest,
+        NearestMipMapLinear,
+        LinearMipMapNearest,
+        LinearMipMapLinear
+    };
+
+    enum PixelFormat
+    {
+        DepthComponent,
+        DepthStencil,
+        Red,
+        RG,
+        RGB,
+        RGBA,
+        SRGB
+    };
+    #pragma endregion Enums
+
+    #pragma region EnumAccessFunctions
+    static GLint GetTextureTarget(TextureTarget target);
+    static GLint GetWrapMode(WrapMode mode);
+    static GLint GetFiltering(Filtering filter);
+    static GLint GetPixelFormat(PixelFormat format);
+    #pragma endregion EnumAccessFunctions
+private:
+
+    uint32_t m_handle {0};
+
+    int m_width, m_height;
+    TextureTarget m_target;
+    WrapMode m_wrappingMethod {WrapMode::Repeat};
+    Filtering m_minFilter {Filtering::LinearMipMapLinear};
+    Filtering m_magFilter {Filtering::Linear};
+public:
+    Texture(TextureTarget target);
+    Texture(TextureTarget target, const char* path, bool generateMipmaps);
+
+    void Bind();
+    void Bind(uint32_t unit);
+    void Allocate(PixelFormat format, GLUtils::DataType dataType);
+    void Write(void* data, PixelFormat format, GLUtils::DataType dataType);
+
+    void SetMinFilter(Filtering filter);
+    void SetMagFilter(Filtering filter);
+    void SetWrapMode(WrapMode mode);
+    void SetSize(int width, int height);
+};
+} // mgl

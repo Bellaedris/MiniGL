@@ -40,6 +40,7 @@ namespace mgl
 
         // meshes to draw
         m_meshes.emplace_back("resources/models/backpack.obj");
+        t = std::make_unique<gpu::Texture>(gpu::Texture::TextureTarget::Target2D, "resources/models/diffuse.jpg", true);
 
         gpu::GLUtils::ClearColor({.2f, .2f, .2f, 1.f});
         gpu::GLUtils::SetDepthTesting(true);
@@ -65,6 +66,8 @@ namespace mgl
         s.Bind();
         s.UniformData("viewMatrix", m_camera->View());
         s.UniformData("projectionMatrix", m_camera->Projection());
+        t->Bind(0);
+        s.UniformData("albedo", 0);
         for(const auto& mesh : m_meshes)
             mesh.Draw();
     }

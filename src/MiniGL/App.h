@@ -10,6 +10,7 @@
 #include "GPU/Shader.h"
 #include "Mesh.h"
 #include "Timer.h"
+#include "GPU/Texture.h"
 
 namespace mgl
 {
@@ -19,6 +20,7 @@ namespace mgl
         Window m_window;
 
         gpu::Shader s;
+        std::unique_ptr<gpu::Texture> t;
         std::vector<Mesh> m_meshes;
         std::unique_ptr<Camera> m_camera {nullptr};
 
