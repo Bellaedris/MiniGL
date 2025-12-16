@@ -7,7 +7,7 @@
 #include <chrono>
 #include <iostream>
 
-namespace mgl
+namespace mgl::gpu
 {
     // concepts to only allow chrono-derived types, thanks https://stackoverflow.com/questions/74383254/concept-that-models-only-the-stdchrono-duration-types
     template <class _Tp>
@@ -49,5 +49,50 @@ namespace mgl
     private:
         Timer<T> m_timer;
         std::string m_name;
+    };
+
+    /**
+     * \brief Scoped timer to measure all the GPU activity in a scope. To use it, call Begin() when you want to start
+     * measure it, then Elapsed when you want to get the elapsed GPU time between the two calls.
+     */
+    class GPUTimer
+    {
+    private:
+        uint32_t m_query {0};
+        int64_t m_timer {0};
+    public:
+        GPUTimer() { glGenQueries(1, &m_query); };
+
+        /**
+         * \brief Creates an OpenGL query to measure time
+         */
+        void Begin() const
+        {
+            glBeginQuery(GL_TIME_ELAPSED, m_query);
+        }
+
+        /**
+         * \brief Ends the query
+         */
+        void End() const
+        {
+            glEndQuery(GL_TIME_ELAPSED);
+        }
+
+        /**
+         * \brief Force the CPU to wait until the GPU returns the query result.
+         * Because of this synchronisation process, be careful when using this class.
+         * \return The elapsed GPU time between Begin and End, in nanoseconds
+         */
+        uint64_t Elapsed()
+        {
+            glGetQueryObjecti64v(m_query, GL_QUERY_RESULT, &m_timer); // stall the CPU
+            return m_timer;
+        }
+
+        ~GPUTimer()
+        {
+            glDeleteQueries(1, &m_query);
+        }
     };
 }
