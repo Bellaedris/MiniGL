@@ -19,40 +19,37 @@ namespace mgl
 class Mesh
 {
 public:
+    #pragma region structs
     struct VertexData
     {
         glm::vec3 pos {};
         glm::vec3 normal {};
         glm::vec2 texcoord {};
-
-        friend bool operator<(const VertexData& lhs, const VertexData& rhs)
-        {
-            if(lhs.pos.x == rhs.pos.x)
-            {
-                if (lhs.pos.y == rhs.pos.y)
-                {
-                    if (lhs.pos.z == rhs.pos.z)
-                        return false;
-                    else
-                        return lhs.pos.z < rhs.pos.z;
-                }
-                else
-                {
-                    return lhs.pos.y < rhs.pos.y;
-                }
-            }
-            else
-            {
-                return lhs.pos.x < rhs.pos.x;
-            }
-        };
     };
+
+    struct VertexKey {
+        int vertexIndex;
+        int texcoordIndex;
+        int normalIndex;
+
+        bool operator<(const VertexKey& other) const {
+            if (vertexIndex  != other.vertexIndex)
+                return vertexIndex  < other.vertexIndex;
+
+            if (texcoordIndex != other.texcoordIndex)
+                return texcoordIndex < other.texcoordIndex;
+
+            return normalIndex < other.normalIndex;
+        }
+    };
+    #pragma endregion structs
 
 private:
     #pragma region Members
-    // TODO read vertexData, write these data into separate per-component vectors, then rebuild a vertexData array when
-    // these data change. This will allow a better flexibility and also allow us to efficiently build our buffer when
-    // read objects have different input datas (for instance, no normals or UVs)
+    /* TODO read vertexData, write these data into separate per-component vectors, then rebuild a vertexData array when
+     these data change. This will allow a better flexibility and also allow us to efficiently build our buffer when
+     read objects have different input datas (for instance, no normals or UVs)
+     */
     std::vector<VertexData> m_verticesData;
     std::vector<uint32_t> m_indices;
 

@@ -33,7 +33,7 @@ namespace mgl
         const tinyobj::attrib_t& attrib = reader.GetAttrib();
         const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
         const std::vector<tinyobj::material_t>& materials = reader.GetMaterials();
-        std::map<VertexData, uint32_t> uniqueVertices;
+        std::map<VertexKey, uint32_t> uniqueVertices;
 
         // Loop over shapes
         for (const auto & shape : shapes)
@@ -51,41 +51,39 @@ namespace mgl
                     // access to vertex
                     tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
 
-                    tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-                    tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-                    tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+                    VertexKey key{ idx.vertex_index, idx.texcoord_index, idx.normal_index };
 
-                    // check if we already have this vertex
-                    glm::vec3 pos(vx, vy, vz);
-
-                    vertex.pos = {vx, vy, vz};
-
-                    // Check if `normal_index` is zero or positive. negative = no normal data
-                    if (idx.normal_index >= 0)
+                    if(uniqueVertices.find(key) == uniqueVertices.end())
                     {
-                        tinyobj::real_t nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
-                        tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
-                        tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+                        tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+                        tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+                        tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
 
-                        vertex.normal = {nx, ny, nz};
-                    }
+                        vertex.pos = {vx, vy, vz};
 
-                    // Check if `texcoord_index` is zero or positive. negative = no texcoord data
-                    if (idx.texcoord_index >= 0)
-                    {
-                        tinyobj::real_t tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
-                        tinyobj::real_t ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+                        // Check if `normal_index` is zero or positive. negative = no normal data
+                        if (idx.normal_index >= 0)
+                        {
+                            tinyobj::real_t nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+                            tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+                            tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
 
-                        vertex.texcoord = {tx, ty};
-                    }
+                            vertex.normal = {nx, ny, nz};
+                        }
 
-                    if(uniqueVertices.find(vertex) == uniqueVertices.end())
-                    {
-                        uniqueVertices[vertex] = m_verticesData.size();
+                        // Check if `texcoord_index` is zero or positive. negative = no texcoord data
+                        if (idx.texcoord_index >= 0)
+                        {
+                            tinyobj::real_t tx = attrib.texcoords[2 * size_t(idx.texcoord_index) + 0];
+                            tinyobj::real_t ty = attrib.texcoords[2 * size_t(idx.texcoord_index) + 1];
+
+                            vertex.texcoord = {tx, ty};
+                        }
+
+                        uniqueVertices[key] = m_verticesData.size();
                         m_verticesData.push_back(vertex);
                     }
-
-                    m_indices.push_back(uniqueVertices[vertex]);
+                    m_indices.push_back(uniqueVertices[key]);
                 }
                 index_offset += faceVertices;
 
@@ -129,8 +127,8 @@ namespace mgl
         m_indexBuffer.Write(sizeof(uint32_t) * m_indices.size(), m_indices.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
 
         m_vao.SetAttribute(0, gpu::GLUtils::DataType::Float, 0, 3, sizeof(VertexData)); // positions
-        m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, sizeof(glm::vec3), 3, sizeof(VertexData)); // normals
-        m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, 2 * sizeof(glm::vec3), 2, sizeof(VertexData)); // texcoords
+        m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // normals
+        m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, texcoord), 2, sizeof(VertexData)); // texcoords
 
         m_vao.Unbind();
     }
