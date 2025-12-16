@@ -81,6 +81,7 @@ private:
 public:
     Texture(TextureTarget target);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
+    ~Texture();
 
     void Bind();
     void Bind(uint32_t unit);

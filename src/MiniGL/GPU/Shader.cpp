@@ -12,6 +12,11 @@ namespace mgl::gpu
         : m_program(glCreateProgram())
     {}
 
+    Shader::~Shader()
+    {
+        glDeleteProgram(m_program);
+    }
+
     void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
     {
         std::optional<std::string> shaderData = utils::FileUtils::read_file(path);
@@ -67,6 +72,4 @@ namespace mgl::gpu
                 return GL_FALSE;
         }
     }
-
-
 } // mgl

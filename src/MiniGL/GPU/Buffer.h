@@ -69,6 +69,7 @@ private:
     #pragma endregion Static Methods
 public:
     Buffer(BufferType type);
+    ~Buffer();
 
     #pragma region Methods
     /**

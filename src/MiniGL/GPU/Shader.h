@@ -35,6 +35,7 @@ public:
      * \brief Creates an OpenGL program
      */
     Shader();
+    ~Shader();
 
     #pragma region Methods
     /**

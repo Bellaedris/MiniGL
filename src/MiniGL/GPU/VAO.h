@@ -21,6 +21,7 @@ private:
 
 public:
     Vao();
+    ~Vao();
 
     /**
      * \brief Binds the VAO for usage

@@ -12,6 +12,11 @@ namespace mgl::gpu
         glGenBuffers(1, &m_buffer);
     }
 
+    Buffer::~Buffer()
+    {
+        glDeleteBuffers(1, &m_buffer);
+    }
+
     void Buffer::Bind() const
     {
         glBindBuffer(GetBufferType(m_type), m_buffer);

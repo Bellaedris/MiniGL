@@ -190,5 +190,11 @@ namespace mgl::gpu
                 return GL_FALSE;
         }
     }
+
+    Texture::~Texture()
+    {
+        glDeleteTextures(1, &m_handle);
+    }
+
     #pragma endregion EnumAccessFunctions
 } // mgl

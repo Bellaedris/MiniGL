@@ -26,4 +26,9 @@ namespace mgl::gpu
         glEnableVertexAttribArray(location);
         glVertexAttribPointer(location, tupleSize, GLUtils::GetDataType(type), GL_FALSE, stride, (void*)offset);
     }
+
+    Vao::~Vao()
+    {
+        glDeleteVertexArrays(1, &m_vao);
+    }
 } // mgl::gpu
