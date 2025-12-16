@@ -8,6 +8,8 @@ MINIGL IS WINDOWS ONLY FOR NOW. FEEL FREE TO CONTRIBUTE TO HANDLE LINUX BUILDS.
 - OpenGL wrappers: Buffer, VAO, Shader OK
 - Mesh creation OK
 - Simple Camera OK
+- Textures OK
+- ImGui OK
 - Framebuffers TODO
 - Cubemaps TODO
 - Materials TODO

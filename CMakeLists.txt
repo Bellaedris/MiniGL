@@ -33,9 +33,15 @@ if (OPENMP_FOUND)
 endif()
 
 add_library(GLAD thirdparty/glad.c)
+
 add_library(TINYOBJ thirdparty/tinyobjloader.cpp)
+
 add_library(STB_IMAGE thirdparty/stb_image.cpp)
-set(LIBS ${GLFW3_LIBRARY} ${OPENGL_LIBRARY} glm::glm GLAD ${CMAKE_DL_LIBS} STB_IMAGE TINYOBJ)
+
+file(GLOB_RECURSE IMGUI_SOURCES includes/imgui/*.cpp)
+add_library(IMGUI ${IMGUI_SOURCES})
+
+set(LIBS ${GLFW3_LIBRARY} ${OPENGL_LIBRARY} glm::glm GLAD ${CMAKE_DL_LIBS} STB_IMAGE TINYOBJ IMGUI)
 
 include_directories("${CMAKE_SOURCE_DIR}/includes")
 
