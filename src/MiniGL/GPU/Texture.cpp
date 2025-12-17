@@ -6,6 +6,37 @@
 
 namespace mgl::gpu
 {
+    Texture::Texture(Texture &&other) noexcept
+            : m_handle(other.m_handle)
+            , m_width(other.m_width)
+            , m_height(other.m_height)
+            , m_target(other.m_target)
+            , m_minFilter(other.m_minFilter)
+            , m_magFilter(other.m_magFilter)
+            , m_wrappingMethod(other.m_wrappingMethod)
+    {
+        other.m_handle = 0;
+    }
+
+    Texture &Texture::operator=(Texture &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteTextures(1, &m_handle);
+            m_handle = other.m_handle;
+            m_handle = other.m_handle;
+            m_width = other.m_width;
+            m_height = other.m_height;
+            m_target = other.m_target;
+            m_minFilter = other.m_minFilter;
+            m_magFilter = other.m_magFilter;
+            m_wrappingMethod = other.m_wrappingMethod;
+
+            other.m_handle = 0;
+        }
+        return *this;
+    }
+
     Texture::Texture(Texture::TextureTarget target)
         : m_target(target)
     {

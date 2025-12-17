@@ -73,7 +73,8 @@ private:
 
     uint32_t m_handle {0};
 
-    int m_width, m_height;
+    int m_width {0};
+    int m_height {0};
     TextureTarget m_target;
     WrapMode m_wrappingMethod {WrapMode::Repeat};
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
@@ -82,6 +83,12 @@ public:
     Texture(TextureTarget target);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
     ~Texture();
+
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
+
+    Texture(Texture&& other) noexcept;
+    Texture& operator=(Texture&& other) noexcept;
 
     void Bind();
     void Bind(uint32_t unit);

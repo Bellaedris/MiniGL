@@ -12,6 +12,25 @@ namespace mgl::gpu
         glGenBuffers(1, &m_buffer);
     }
 
+    Buffer::Buffer(Buffer &&other) noexcept
+        : m_type(other.m_type)
+        , m_buffer(other.m_buffer)
+    {
+        other.m_buffer = 0;
+    }
+
+    Buffer &Buffer::operator=(Buffer &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteBuffers(1, &m_buffer);
+            m_buffer = other.m_buffer;
+            m_type = other.m_type;
+            other.m_buffer = 0;
+        }
+        return *this;
+    }
+
     Buffer::~Buffer()
     {
         glDeleteBuffers(1, &m_buffer);

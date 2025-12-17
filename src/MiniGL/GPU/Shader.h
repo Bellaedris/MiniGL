@@ -37,6 +37,12 @@ public:
     Shader();
     ~Shader();
 
+    Shader(const Shader&) = delete;
+    Shader& operator=(const Shader&) = delete;
+
+    Shader(Shader&& other) noexcept;
+    Shader& operator=(Shader&& other) noexcept;
+
     #pragma region Methods
     /**
      * \brief Add a shader to the shader program

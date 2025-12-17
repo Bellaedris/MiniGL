@@ -23,6 +23,16 @@ public:
     Vao();
     ~Vao();
 
+    // Since I bundle my VAOs into other classes, i will very likely get copies of these VAOs, for instance when doing
+    // push_back(). Even tho we copy the Vao ID, we also call the VAO destructor that deletes the resource, which deletes the
+    // GPU representation. We should disallow VAO copies and force move.
+    // See https://wikis.khronos.org/opengl/Common_Mistakes#RAII_and_hidden_destructor_calls
+    Vao(const Vao&) = delete;
+    Vao& operator=(const Vao&) = delete;
+
+    Vao(Vao&& other) noexcept;
+    Vao& operator=(Vao&& other) noexcept;
+
     /**
      * \brief Binds the VAO for usage
      */

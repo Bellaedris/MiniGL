@@ -71,6 +71,13 @@ public:
     Buffer(BufferType type);
     ~Buffer();
 
+    // same than VAOs, Buffers aren't copy-constructible, they only implement move semantics.
+    Buffer(const Buffer&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
+
+    Buffer(Buffer&& other) noexcept;
+    Buffer& operator=(Buffer&& other) noexcept;
+
     #pragma region Methods
     /**
      * \brief Binds the buffer to be able to use it. Must be called before any operation on the buffer

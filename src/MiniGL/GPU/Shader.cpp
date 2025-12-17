@@ -12,6 +12,23 @@ namespace mgl::gpu
         : m_program(glCreateProgram())
     {}
 
+    Shader::Shader(Shader &&other) noexcept
+        : m_program(other.m_program)
+    {
+        other.m_program = 0;
+    }
+
+    Shader &Shader::operator=(Shader &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteProgram(m_program);
+            m_program = other.m_program;
+            other.m_program = 0;
+        }
+        return *this;
+    }
+
     Shader::~Shader()
     {
         glDeleteProgram(m_program);
