@@ -18,15 +18,18 @@ public:
     #pragma region Enum
     enum ShaderType
     {
-        VERTEX,
-        FRAGMENT,
-        COMPUTE
+        Vertex,
+        Fragment,
+        Compute,
+        None
     };
     #pragma endregion Enum
 
 private:
     #pragma region Members
     uint32_t m_program;
+    bool m_created {false};
+    ShaderType m_type {ShaderType::None};
     #pragma endregion Members
 
     GLuint GetShaderType(ShaderType type);
@@ -45,7 +48,9 @@ public:
 
     #pragma region Methods
     /**
-     * \brief Add a shader to the shader program
+     * \brief Add a shader to the shader program. Note that compute shader programs can only contain a single shader.
+     * Other programs can contain as many non-compute programs. The usual workflow would be to either add a vertex,
+     * then fragment shader, or to add a single compute.
      * \param type The kind of shader to add. Only supports Vertex, Fragment and Compute for the moment
      * \param path Path to the shader. Remember that by default, the runtime's root is where the exe is located, so PATH/TO/PROJECT/bin
      */
@@ -60,6 +65,16 @@ public:
      * \brief Bind the shader for use
      */
     void Bind();
+
+    /**
+     * \brief Compute shaders only. Dispatches a compute shader using work groups of size x * y * z.
+     * Work group sizes in all dimensions should be a multiple of 32 (Nvidia GPUs have warps of size 32, Amd of size 64).
+     * For instance, using a size of 1 * 1 * 1 on an nvidia GPU will result in an entire warp being dispatched, but only 1 thread
+     * \param x number of work groups in the X dimension
+     * \param y number of work groups in the Y dimension
+     * \param z number of work groups in the Z dimension
+     */
+    void Dispatch(uint32_t x, uint32_t y, uint32_t z);
     #pragma endregion Methods
 
     #pragma region Uniform data

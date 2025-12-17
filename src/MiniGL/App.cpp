@@ -40,8 +40,8 @@ namespace mgl
         m_camera = std::make_unique<Camera>(glm::vec3(0, 0, 0), 16.f / 9.f, 70.f, .01f, 1000.f);
 
         // simple shader
-        s.AddShaderFromFile(mgl::gpu::Shader::VERTEX, "shaders/default.vert");
-        s.AddShaderFromFile(mgl::gpu::Shader::FRAGMENT, "shaders/default.frag");
+        s.AddShaderFromFile(gpu::Shader::Vertex, "shaders/default.vert");
+        s.AddShaderFromFile(gpu::Shader::Fragment, "shaders/default.frag");
         s.Create();
 
         // meshes to draw

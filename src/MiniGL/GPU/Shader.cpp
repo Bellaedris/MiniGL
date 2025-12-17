@@ -36,6 +36,20 @@ namespace mgl::gpu
 
     void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
     {
+        if(m_type == ShaderType::Compute)
+        {
+            std::cerr << "A compute program should only contain a compute shader\n";
+            return;
+        }
+
+        if(type == ShaderType::Compute && m_type != ShaderType::None)
+        {
+            std::cerr << "A compute program must contain a single compute shader\n";
+            return;
+        }
+
+        m_type = type;
+
         std::optional<std::string> shaderData = utils::FileUtils::read_file(path);
         if(shaderData.has_value() == false)
         {
@@ -67,10 +81,23 @@ namespace mgl::gpu
     void Shader::Create()
     {
         glLinkProgram(m_program);
+        int success;
+        char infoLog[512];
+        glGetShaderiv(m_program, GL_LINK_STATUS, &success);
+
+        if (!success)
+        {
+            glGetShaderInfoLog(m_program, 512, nullptr, infoLog);
+            std::cout << "error linking program: " << infoLog << std::endl;
+        }
+        else
+            m_created = true;
     }
 
     void Shader::Bind()
     {
+        if(m_created == false)
+            Create();
         glUseProgram(m_program);
     }
 
@@ -78,15 +105,25 @@ namespace mgl::gpu
     {
         switch(type)
         {
-            case VERTEX:
+            case Vertex:
                 return GL_VERTEX_SHADER;
-            case FRAGMENT:
+            case Fragment:
                 return GL_FRAGMENT_SHADER;
-            case COMPUTE:
+            case Compute:
                 return GL_COMPUTE_SHADER;
             default:
                 std::cerr << "Invalid shader type";
                 return GL_FALSE;
         }
+    }
+
+    void Shader::Dispatch(uint32_t x, uint32_t y, uint32_t z)
+    {
+        if(m_type != ShaderType::Compute)
+        {
+            std::cerr << "Cannot dispatch a non-compute shader\n";
+            return;
+        }
+        glDispatchCompute(x, y ,z);
     }
 } // mgl
