@@ -1,0 +1,3 @@
+// the configured options and settings for MiniGL
+#define MiniGL_VERSION_MAJOR @MiniGL_VERSION_MAJOR@
+#define MiniGL_VERSION_MINOR @MiniGL_VERSION_MINOR@

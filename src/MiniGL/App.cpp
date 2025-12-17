@@ -3,6 +3,7 @@
 //
 
 #include "App.h"
+#include "MiniGLConfig.h"
 
 namespace mgl
 {
@@ -101,7 +102,7 @@ namespace mgl
                 ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysAutoResize
         );
         {
-            ImGui::Text("MiniGL version 0.0.1");
+            ImGui::Text("MiniGL version %d.%d", MiniGL_VERSION_MAJOR, MiniGL_VERSION_MINOR);
             ImGui::Text("OpenGL%s", api);
             ImGui::Text("%s %s", vendor, gpu);
 

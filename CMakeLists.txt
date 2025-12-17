@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.27)
-project(MiniGL)
+project(MiniGL VERSION 0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,6 +20,9 @@ file(GLOB_RECURSE SOURCES
 )
 
 add_executable(MiniGL ${SOURCES})
+
+configure_file(MiniGLConfig.h.in ${CMAKE_SOURCE_DIR}/src/MiniGLConfig.h)
+target_include_directories(MiniGL PUBLIC "${PROJECT_BINARY_DIR}")
 
 find_package(GLM CONFIG REQUIRED)
 message(STATUS "Found GLM in ${GLM_INCLUDE_DIR}")
