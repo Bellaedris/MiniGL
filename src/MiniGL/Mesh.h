@@ -58,11 +58,16 @@ private:
     #pragma endregion Members
 public:
     Mesh(const char* filename);
+    Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices);
 
     void RecalculateNormals();
     void SetupGPU();
 
     void Draw() const;
     void DrawUnindexed();
+
+    #pragma region Static helpers
+    static Mesh GeneratePlane(float halfSize);
+    #pragma endregion Static helpers
 };
 } // mgl

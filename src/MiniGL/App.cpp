@@ -45,7 +45,8 @@ namespace mgl
         s.Create();
 
         // meshes to draw
-        m_meshes.emplace_back("resources/models/backpack.obj");
+        m_meshes.push_back(std::move(Mesh("resources/models/backpack.obj")));
+        m_meshes.push_back(std::move(Mesh::GeneratePlane(1.f)));
         t = std::make_unique<gpu::Texture>(gpu::Texture::TextureTarget::Target2D, "resources/models/diffuse.jpg", true);
 
         gpu::GLUtils::ClearColor({.2f, .2f, .2f, 1.f});
@@ -112,11 +113,12 @@ namespace mgl
             uint64_t elapsedGPU = m_gpuDeltaTime.Elapsed();
             // ugly way to convert to a readable format but I'm kinda lazy and don't want to fight both
             // std::chrono types and c strings
+            float cpuSeconds = m_deltaTime * 1000.f;
             int milli = (int) (elapsedGPU / 1000000);
             int micro = (int) ((elapsedGPU / 1000) % 1000);
             ImGui::Text(
                     "cpu %03fms\ngpu %02dms % 03dus",
-                    m_deltaTime,
+                    cpuSeconds,
                     milli, micro
             );
             ImGui::End();

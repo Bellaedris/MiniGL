@@ -97,6 +97,15 @@ namespace mgl
         SetupGPU();
     }
 
+    Mesh::Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices)
+        : m_verticesData(std::move(vertices))
+        , m_indices(std::move(indices))
+        , m_buffer(gpu::Buffer::BufferType::Vertex)
+        , m_indexBuffer(gpu::Buffer::BufferType::Index)
+    {
+        SetupGPU();
+    }
+
     void Mesh::Draw() const
     {
         m_vao.Bind();
@@ -131,5 +140,24 @@ namespace mgl
         m_vao.SetAttribute(2, gpu::GLUtils::DataType::Float, offsetof(VertexData, texcoord), 2, sizeof(VertexData)); // texcoords
 
         m_vao.Unbind();
+    }
+
+    Mesh Mesh::GeneratePlane(float halfSize)
+    {
+        std::vector<VertexData> vertices =
+        {
+            {{-halfSize, 0, halfSize}, {0, 1, 0}, {0.0f, 1.0f}},
+            {{-halfSize, 0, -halfSize}, {0, 1, 0}, {0.0f, 0.0f}},
+            {{halfSize, 0, halfSize}, {0, 1, 0}, {1.0f, 1.0f}},
+            {{halfSize, 0, -halfSize}, {0, 1, 0}, {1.0f, 0.0f}}
+        };
+
+        std::vector<uint32_t> indices =
+        {
+            0, 1, 2,
+            1, 3, 2
+        };
+
+        return {vertices, indices};
     }
 } // mgl
