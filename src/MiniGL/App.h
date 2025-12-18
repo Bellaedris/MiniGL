@@ -26,7 +26,9 @@ namespace mgl
         Window m_window;
 
         gpu::Shader s;
+        gpu::Shader compute;
         std::unique_ptr<gpu::Texture> t;
+        std::unique_ptr<gpu::Texture> m_tonemappingTexture;
         std::unique_ptr<gpu::Framebuffer> f;
         std::vector<Mesh> m_meshes;
         std::unique_ptr<Camera> m_camera {nullptr};

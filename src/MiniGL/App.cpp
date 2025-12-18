@@ -25,10 +25,8 @@ namespace mgl
         {
             PreRender();
 
-            m_gpuDeltaTime.Begin();
             Render();
             RenderUI();
-            m_gpuDeltaTime.End();
 
             m_window.SwapBuffers();
             m_window.PollEvents();
@@ -41,11 +39,11 @@ namespace mgl
     {
         // initialize what needs to be rendered here
         // camera
-        m_camera = std::make_unique<Camera>(glm::vec3(0, 0, 0), 16.f / 9.f, 70.f, .01f, 1000.f);
+        m_camera = std::make_unique<Camera>(glm::vec3(0, 0, 0), m_window.AspectRatio(), 70.f, .01f, 1000.f);
 
-        f = std::make_unique<gpu::Framebuffer>(1360, 768);
+        f = std::make_unique<gpu::Framebuffer>(m_window.Width(), m_window.Height());
         f->Attach(gpu::Framebuffer::Attachment::Color);
-        //f->Attach(gpu::Framebuffer::Attachment::Depth);
+        f->Attach(gpu::Framebuffer::Attachment::Depth);
         f->Unbind(gpu::Framebuffer::Type::ReadWrite);
 
         // simple shader
@@ -53,10 +51,18 @@ namespace mgl
         s.AddShaderFromFile(gpu::Shader::Fragment, "shaders/default.frag");
         s.Create();
 
+        compute.AddShaderFromFile(gpu::Shader::Compute, "shaders/tonemap.comp");
+        compute.Create();
+
         // meshes to draw
         m_meshes.push_back(std::move(Mesh("resources/models/backpack.obj")));
         m_meshes.push_back(std::move(Mesh::GeneratePlane(1.f)));
         t = std::make_unique<gpu::Texture>(gpu::Texture::TextureTarget::Target2D, "resources/models/diffuse.jpg", true);
+        m_tonemappingTexture = std::make_unique<gpu::Texture>(gpu::Texture::TextureTarget::Target2D);
+        m_tonemappingTexture->SetSize(m_window.Width(), m_window.Height());
+        m_tonemappingTexture->SetMinFilter(gpu::Texture::Linear);
+        m_tonemappingTexture->SetMagFilter(gpu::Texture::Linear);
+        m_tonemappingTexture->Allocate(gpu::Texture::RGBA, gpu::GLUtils::UnsignedByte);
 
         gpu::GLUtils::ClearColor({.2f, .2f, .2f, 1.f});
         gpu::GLUtils::SetDepthTesting(true);
@@ -77,11 +83,12 @@ namespace mgl
 
     void App::Render()
     {
+        m_gpuDeltaTime.Begin();
         // clear the framebuffer
         gpu::GLUtils::Clear();
 
         // Render the frame
-        f->Bind(gpu::Framebuffer::Type::ReadWrite);
+        f->Bind(gpu::Framebuffer::Type::Write);
         gpu::GLUtils::SetDepthTesting(true);
         gpu::GLUtils::Clear();
 
@@ -93,10 +100,20 @@ namespace mgl
         for(const auto& mesh : m_meshes)
             mesh.Draw();
 
+        // post processing
+        compute.Bind();
+        m_tonemappingTexture->BindImage(0, 0, gpu::GLUtils::Write);
+        f->ColorTexture()->Bind(1);
+        compute.UniformData("framebuffer", 1);
+
+        compute.Dispatch(1360, 768, 1);
+        glMemoryBarrier( GL_ALL_BARRIER_BITS );
+
         f->Unbind(gpu::Framebuffer::Type::ReadWrite);
         glViewport(0, 0, 1360, 768);
 
         glBlitNamedFramebuffer(f->Handle(), 0, 0, 0, 1360, 768, 0, 0, 1360, 768,  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        m_gpuDeltaTime.Begin();
     }
 
     void App::RenderUI()
