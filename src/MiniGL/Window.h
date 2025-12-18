@@ -40,6 +40,9 @@ namespace mgl
 
         glm::vec3 GatherInput();
 
+        [[nodiscard]] inline int const Width() const { return m_width; };
+        [[nodiscard]] inline int const Height() const { return m_height; };
+        [[nodiscard]] inline float const AspectRatio() const { return static_cast<float>(m_width) / static_cast<float>(m_height); };
         [[nodiscard]] inline GLFWwindow* const GetWindow() const { return m_window; };
         [[nodiscard]] inline glm::vec2 GetMousePosOffset() const { return {m_offsetX, m_offsetY}; };
     };
