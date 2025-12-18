@@ -30,8 +30,9 @@ namespace mgl::gpu
             UnsignedShort,
             Int,
             UnsignedInt,
+            UnsignedInt_24_8,
             Float,
-            Double
+            Double,
         };
 
         static GLuint GetDataType(DataType type)
@@ -52,6 +53,8 @@ namespace mgl::gpu
                     return GL_INT;
                 case DataType::UnsignedInt:
                     return GL_UNSIGNED_INT;
+                case UnsignedInt_24_8:
+                    return GL_UNSIGNED_INT_24_8;
                 case DataType::Double:
                     return GL_DOUBLE;
                 default:

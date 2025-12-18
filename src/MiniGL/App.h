@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "GPU/Shader.h"
 #include "Mesh.h"
+#include "GPU/Framebuffer.h"
 #include "GPU/Timer.h"
 #include "GPU/Texture.h"
 
@@ -26,6 +27,7 @@ namespace mgl
 
         gpu::Shader s;
         std::unique_ptr<gpu::Texture> t;
+        std::unique_ptr<gpu::Framebuffer> f;
         std::vector<Mesh> m_meshes;
         std::unique_ptr<Camera> m_camera {nullptr};
 

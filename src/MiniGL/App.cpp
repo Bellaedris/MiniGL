@@ -4,6 +4,7 @@
 
 #include "App.h"
 #include "MiniGLConfig.h"
+#include "GPU/Framebuffer.h"
 
 namespace mgl
 {
@@ -24,8 +25,10 @@ namespace mgl
         {
             PreRender();
 
+            m_gpuDeltaTime.Begin();
             Render();
             RenderUI();
+            m_gpuDeltaTime.End();
 
             m_window.SwapBuffers();
             m_window.PollEvents();
@@ -39,6 +42,11 @@ namespace mgl
         // initialize what needs to be rendered here
         // camera
         m_camera = std::make_unique<Camera>(glm::vec3(0, 0, 0), 16.f / 9.f, 70.f, .01f, 1000.f);
+
+        f = std::make_unique<gpu::Framebuffer>(1360, 768);
+        f->Attach(gpu::Framebuffer::Attachment::Color);
+        //f->Attach(gpu::Framebuffer::Attachment::Depth);
+        f->Unbind(gpu::Framebuffer::Type::ReadWrite);
 
         // simple shader
         s.AddShaderFromFile(gpu::Shader::Vertex, "shaders/default.vert");
@@ -69,12 +77,14 @@ namespace mgl
 
     void App::Render()
     {
-        m_gpuDeltaTime.Begin();
-
         // clear the framebuffer
         gpu::GLUtils::Clear();
 
         // Render the frame
+        f->Bind(gpu::Framebuffer::Type::ReadWrite);
+        gpu::GLUtils::SetDepthTesting(true);
+        gpu::GLUtils::Clear();
+
         s.Bind();
         s.UniformData("viewMatrix", m_camera->View());
         s.UniformData("projectionMatrix", m_camera->Projection());
@@ -83,7 +93,10 @@ namespace mgl
         for(const auto& mesh : m_meshes)
             mesh.Draw();
 
-        m_gpuDeltaTime.End();
+        f->Unbind(gpu::Framebuffer::Type::ReadWrite);
+        glViewport(0, 0, 1360, 768);
+
+        glBlitNamedFramebuffer(f->Handle(), 0, 0, 0, 1360, 768, 0, 0, 1360, 768,  GL_COLOR_BUFFER_BIT, GL_NEAREST);
     }
 
     void App::RenderUI()
