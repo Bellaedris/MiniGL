@@ -63,6 +63,29 @@ namespace mgl::gpu
             }
         }
 
+        enum Access
+        {
+            Read,
+            Write,
+            ReadWrite
+        };
+
+        static GLint GetAccess(Access access)
+        {
+            switch (access)
+            {
+                case Read:
+                    return GL_READ_ONLY;
+                case Write:
+                    return GL_WRITE_ONLY;
+                case ReadWrite:
+                    return GL_READ_WRITE;
+                default:
+                    std::cerr << "Invalid access type\n";
+                    return GL_FALSE;
+            }
+        }
+
         static void ClearColor(const glm::vec4& color)
         {
             glClearColor(color.r, color.g, color.b, color.a);
