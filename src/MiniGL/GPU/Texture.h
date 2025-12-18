@@ -67,7 +67,10 @@ public:
     static GLint GetTextureTarget(TextureTarget target);
     static GLint GetWrapMode(WrapMode mode);
     static GLint GetFiltering(Filtering filter);
+    // TODO this function is horrible. Replace by a proper gigantic enum with all the formats we will need.
+    static GLint GetPixelInternalFormat(PixelFormat format, GLUtils::DataType type);
     static GLint GetPixelFormat(PixelFormat format);
+    static GLint GetImageFormat(PixelFormat format);
     #pragma endregion EnumAccessFunctions
 private:
 
@@ -79,8 +82,8 @@ private:
     WrapMode m_wrappingMethod {WrapMode::Repeat};
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
     Filtering m_magFilter {Filtering::Linear};
+    PixelFormat m_format {};
 public:
-    Texture();
     Texture(TextureTarget target);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
     ~Texture();
@@ -94,12 +97,14 @@ public:
     [[nodiscard]] inline uint32_t Handle() {return m_handle; };
     void Bind();
     void Bind(uint32_t unit);
+    void BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access);
     void Allocate(PixelFormat format, GLUtils::DataType dataType);
     void Write(void* data, PixelFormat format, GLUtils::DataType dataType);
 
     void SetMinFilter(Filtering filter);
     void SetMagFilter(Filtering filter);
     void SetWrapMode(WrapMode mode);
+    void SetBorderColor(const glm::vec4& color);
     void SetSize(int width, int height);
 };
 } // mgl

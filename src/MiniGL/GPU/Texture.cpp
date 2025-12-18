@@ -7,12 +7,6 @@
 
 namespace mgl::gpu
 {
-    Texture::Texture()
-        : m_target(TextureTarget::Target2D)
-    {
-        glGenTextures(1, &m_handle);
-    }
-
     Texture::Texture(Texture &&other) noexcept
             : m_handle(other.m_handle)
             , m_width(other.m_width)
@@ -30,7 +24,6 @@ namespace mgl::gpu
         if (this != &other)
         {
             glDeleteTextures(1, &m_handle);
-            m_handle = other.m_handle;
             m_handle = other.m_handle;
             m_width = other.m_width;
             m_height = other.m_height;
@@ -83,14 +76,14 @@ namespace mgl::gpu
     {
         Bind();
         m_minFilter = filter;
-        glTexParameteri(GetTextureTarget(m_target), GL_TEXTURE_MIN_FILTER, GetFiltering(filter));
+        glTexParameteri(GetTextureTarget(m_target), GL_TEXTURE_MIN_FILTER, GetFiltering(m_minFilter));
     }
 
     void Texture::SetMagFilter(Texture::Filtering filter)
     {
         Bind();
         m_magFilter = filter;
-        glTexParameteri(GetTextureTarget(m_target), GL_TEXTURE_MAG_FILTER, GetFiltering(filter));
+        glTexParameteri(GetTextureTarget(m_target), GL_TEXTURE_MAG_FILTER, GetFiltering(m_magFilter));
     }
 
     void Texture::SetWrapMode(Texture::WrapMode mode)
@@ -101,6 +94,17 @@ namespace mgl::gpu
         glTexParameteri(GetTextureTarget(m_target), GL_TEXTURE_WRAP_T, GetWrapMode(mode));
     }
 
+    void Texture::SetBorderColor(const glm::vec4& color)
+    {
+        if(m_wrappingMethod != ClampToBorder)
+        {
+            std::cerr << "Border color is only settable when using textures that use ClampToBorder wrapping method\n";
+            return;
+        }
+        float borderColor[4] = {color.r, color.g, color.b, color.a};
+        glTexParameterfv(GetTextureTarget(m_target), GL_TEXTURE_BORDER_COLOR, borderColor);
+    }
+
     void Texture::SetSize(int width, int height)
     {
         m_width = width;
@@ -109,27 +113,29 @@ namespace mgl::gpu
 
     void Texture::Allocate(Texture::PixelFormat format, GLUtils::DataType dataType)
     {
+        m_format = format;
         Bind();
         glTexImage2D(
             GetTextureTarget(m_target),
             0,
-            GetPixelFormat(format),
+            GetPixelInternalFormat(format, dataType),
             m_width,
             m_height,
             0,
-            GLUtils::GetDataType(dataType),
             GetPixelFormat(format),
+            GLUtils::GetDataType(dataType),
             nullptr
         );
     }
 
     void Texture::Write(void *data, Texture::PixelFormat format, GLUtils::DataType dataType)
     {
+        m_format = format;
         Bind();
         glTexImage2D(
                 GetTextureTarget(m_target),
                 0,
-                GL_RGB,
+                GetPixelInternalFormat(format, dataType),
                 m_width,
                 m_height,
                 0,
@@ -148,6 +154,11 @@ namespace mgl::gpu
     {
         glActiveTexture(GL_TEXTURE0 + unit);
         Bind();
+    }
+
+    void Texture::BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access)
+    {
+        glBindImageTexture(unit, m_handle, mipLevel, GL_FALSE, 0, GLUtils::GetAccess(access), GetImageFormat(m_format));
     }
 
     #pragma region EnumAccessFunctions
@@ -225,6 +236,50 @@ namespace mgl::gpu
                 return GL_SRGB;
             default:
                 std::cerr << "Unknown pixel format";
+                return GL_FALSE;
+        }
+    }
+
+    GLint Texture::GetImageFormat(Texture::PixelFormat format)
+    {
+        switch(format)
+        {
+            case Red:
+                return GL_R8;
+            case RG:
+                return GL_RG8;
+            case RGB:
+                return GL_RGBA8;
+            case RGBA:
+                return GL_RGBA8;
+            case SRGB:
+                return GL_SRGB8;
+            default:
+                std::cerr << "Unknown image format";
+                return GL_FALSE;
+        }
+    }
+
+    GLint Texture::GetPixelInternalFormat(Texture::PixelFormat format, GLUtils::DataType type)
+    {
+        switch(format)
+        {
+            case DepthComponent:
+                return GL_DEPTH_COMPONENT32F;
+            case DepthStencil:
+                return GL_DEPTH32F_STENCIL8;
+            case Red:
+                return type == GLUtils::Float ? GL_R32F : GL_R8;
+            case RG:
+                return type == GLUtils::Float ? GL_RG32F : GL_RG8;
+            case RGB:
+                return type == GLUtils::Float ? GL_RGB32F : GL_RGBA8;
+            case RGBA:
+                return type == GLUtils::Float ? GL_RGBA32F : GL_RGBA8;
+            case SRGB:
+                return GL_SRGB8;
+            default:
+                std::cerr << "Unknown image format";
                 return GL_FALSE;
         }
     }
