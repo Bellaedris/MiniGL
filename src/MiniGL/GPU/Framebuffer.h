@@ -34,12 +34,20 @@ private:
 
     uint32_t m_width;
     uint32_t m_height;
-    Texture m_colorTexture;
-    Texture m_depthTexture;
+    std::unique_ptr<Texture> m_colorTexture {nullptr};
+    std::unique_ptr<Texture> m_depthTexture {nullptr};
 public:
+    ~Framebuffer();
+    Framebuffer(const Framebuffer&) = delete;
+    Framebuffer& operator=(const Framebuffer& other) = delete;
+    Framebuffer(Framebuffer&& other) noexcept;
+    Framebuffer& operator=(Framebuffer&& other) noexcept;
+
     Framebuffer(uint32_t width, uint32_t height);
 
     [[nodiscard]] uint32_t Handle() { return m_handle; };
+    [[nodiscard]] const std::unique_ptr<Texture>& ColorTexture() const;
+    [[nodiscard]] const std::unique_ptr<Texture>& DepthTexture() const;
     void Attach(Attachment attachment);
     void Bind(Type type);
     void Unbind(Type type);
