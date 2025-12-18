@@ -80,6 +80,7 @@ private:
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
     Filtering m_magFilter {Filtering::Linear};
 public:
+    Texture();
     Texture(TextureTarget target);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
     ~Texture();
@@ -90,6 +91,7 @@ public:
     Texture(Texture&& other) noexcept;
     Texture& operator=(Texture&& other) noexcept;
 
+    [[nodiscard]] inline uint32_t Handle() {return m_handle; };
     void Bind();
     void Bind(uint32_t unit);
     void Allocate(PixelFormat format, GLUtils::DataType dataType);

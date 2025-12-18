@@ -3,9 +3,16 @@
 //
 
 #include "Texture.h"
+#include "Texture.h"
 
 namespace mgl::gpu
 {
+    Texture::Texture()
+        : m_target(TextureTarget::Target2D)
+    {
+        glGenTextures(1, &m_handle);
+    }
+
     Texture::Texture(Texture &&other) noexcept
             : m_handle(other.m_handle)
             , m_width(other.m_width)
