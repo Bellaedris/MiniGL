@@ -46,10 +46,18 @@ namespace mgl
         f->Attach(gpu::Framebuffer::Attachment::Depth);
         f->Unbind(gpu::Framebuffer::Type::ReadWrite);
 
+        fShadow = std::make_unique<gpu::Framebuffer>(m_window.Width(), m_window.Height());
+        fShadow->Attach(gpu::Framebuffer::Depth);
+        fShadow->Unbind(gpu::Framebuffer::Type::ReadWrite);
+
         // simple shader
         s.AddShaderFromFile(gpu::Shader::Vertex, "shaders/default.vert");
         s.AddShaderFromFile(gpu::Shader::Fragment, "shaders/default.frag");
         s.Create();
+
+        shaderShadowmapping.AddShaderFromFile(gpu::Shader::Vertex, "shaders/shadowmapping.vert");
+        shaderShadowmapping.AddShaderFromFile(gpu::Shader::Fragment, "shaders/shadowmapping.frag");
+        shaderShadowmapping.Create();
 
         compute.AddShaderFromFile(gpu::Shader::Compute, "shaders/tonemap.comp");
         compute.Create();
@@ -88,17 +96,45 @@ namespace mgl
         gpu::GLUtils::Clear();
 
         // Render the frame
-        f->Bind(gpu::Framebuffer::Type::Write);
+        fShadow->Bind(gpu::Framebuffer::Type::Write);
         gpu::GLUtils::SetDepthTesting(true);
         gpu::GLUtils::Clear();
 
+        shaderShadowmapping.Bind();
+        glm::mat4 shadowmapModel(1.f);
+        glm::mat4 shadowView = glm::lookAt({0, 10, 10}, {0, 0, 0}, VectorUtils::UP);
+        glm::mat4 shadowProj = glm::ortho(-10.f, 10.f, -10.f, 10.f, .01f, 1000.f);
+        shaderShadowmapping.UniformData("modelMatrix", shadowmapModel);
+        shaderShadowmapping.UniformData("viewMatrix", shadowView);
+        shaderShadowmapping.UniformData("projectionMatrix", shadowProj);
+        t->Bind(0);
+        // draw backpack
+        m_meshes[0].Draw();
+        shadowmapModel = glm::translate(shadowmapModel, {0, -5, 0});
+        shadowmapModel = glm::scale(shadowmapModel, {10.0f, 10.0f, 10.0f});
+        shaderShadowmapping.UniformData("modelMatrix", shadowmapModel);
+        m_meshes[1].Draw();
+
+        f->Bind(gpu::Framebuffer::Type::Write);
+        gpu::GLUtils::SetDepthTesting(true);
+        gpu::GLUtils::Clear();
         s.Bind();
+        glm::mat4 model(1.f);
+        s.UniformData("modelMatrix", model);
         s.UniformData("viewMatrix", m_camera->View());
         s.UniformData("projectionMatrix", m_camera->Projection());
+        s.UniformData("lightspaceMatrix", shadowProj * shadowView * model);
+        fShadow->DepthTexture()->Bind(1);
         t->Bind(0);
         s.UniformData("albedo", 0);
-        for(const auto& mesh : m_meshes)
-            mesh.Draw();
+        s.UniformData("shadowmap", 1);
+        // draw backpack
+        m_meshes[0].Draw();
+
+        model = glm::translate(model, {0, -5, 0});
+        model = glm::scale(model, {10.0f, 10.0f, 10.0f});
+        s.UniformData("modelMatrix", model);
+        m_meshes[1].Draw();
 
         // post processing
         compute.Bind();
@@ -113,7 +149,7 @@ namespace mgl
         glViewport(0, 0, 1360, 768);
 
         glBlitNamedFramebuffer(f->Handle(), 0, 0, 0, 1360, 768, 0, 0, 1360, 768,  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        m_gpuDeltaTime.Begin();
+        m_gpuDeltaTime.End();
     }
 
     void App::RenderUI()

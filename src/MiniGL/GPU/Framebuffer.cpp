@@ -6,6 +6,11 @@
 
 namespace mgl::gpu
 {
+    Framebuffer::~Framebuffer()
+    {
+        glDeleteFramebuffers(1, &m_handle);
+    }
+
     Framebuffer::Framebuffer(Framebuffer &&other) noexcept
         : m_width(other.m_width)
         , m_height(other.m_height)
@@ -101,7 +106,7 @@ namespace mgl::gpu
         if(m_colorTexture == nullptr)
         {
             std::cerr << "This framebuffer has no color attachment\n";
-            return 0;
+            return nullptr;
         }
         return m_colorTexture;
     }
@@ -111,7 +116,7 @@ namespace mgl::gpu
         if(m_depthTexture == nullptr)
         {
             std::cerr << "This framebuffer has no depth attachment\n";
-            return 0;
+            return nullptr;
         }
         return m_depthTexture;
     }

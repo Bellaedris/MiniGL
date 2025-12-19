@@ -26,12 +26,15 @@ namespace mgl
         Window m_window;
 
         gpu::Shader s;
+        gpu::Shader shaderShadowmapping;
         gpu::Shader compute;
         std::unique_ptr<gpu::Texture> t;
         std::unique_ptr<gpu::Texture> m_tonemappingTexture;
         std::unique_ptr<gpu::Framebuffer> f;
+        std::unique_ptr<gpu::Framebuffer> fShadow;
         std::vector<Mesh> m_meshes;
         std::unique_ptr<Camera> m_camera {nullptr};
+        std::unique_ptr<Camera> m_lightCamera {nullptr};
 
         gpu::Timer<std::chrono::seconds> m_deltaTimer;
         gpu::GPUTimer m_gpuDeltaTime;
