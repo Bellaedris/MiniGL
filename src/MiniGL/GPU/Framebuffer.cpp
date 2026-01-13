@@ -6,6 +6,11 @@
 
 namespace mgl::gpu
 {
+    Framebuffer::~Framebuffer()
+    {
+        glDeleteFramebuffers(1, &m_handle);
+    }
+
     Framebuffer::Framebuffer(Framebuffer &&other) noexcept
         : m_width(other.m_width)
         , m_height(other.m_height)
@@ -96,12 +101,28 @@ namespace mgl::gpu
         }
     }
 
+    GLint Framebuffer::GetAttachment(Framebuffer::Attachment attachment)
+    {
+        switch (attachment)
+        {
+            case Color:
+                return GL_COLOR_BUFFER_BIT;
+            case Depth:
+                return GL_DEPTH_BUFFER_BIT;
+            case Stencil:
+                return GL_STENCIL_BUFFER_BIT;
+            default:
+                std::cerr << "Invalid Attachment type\n";
+                return GL_FALSE;
+        }
+    }
+
     const std::unique_ptr<Texture>& Framebuffer::ColorTexture() const
     {
         if(m_colorTexture == nullptr)
         {
             std::cerr << "This framebuffer has no color attachment\n";
-            return 0;
+            return nullptr;
         }
         return m_colorTexture;
     }
@@ -111,8 +132,28 @@ namespace mgl::gpu
         if(m_depthTexture == nullptr)
         {
             std::cerr << "This framebuffer has no depth attachment\n";
-            return 0;
+            return nullptr;
         }
         return m_depthTexture;
+    }
+
+    void Framebuffer::BlitFramebuffer(
+            const std::unique_ptr<Framebuffer> &src,
+            const std::unique_ptr<Framebuffer> &dst,
+            int srcX0,
+            int srcY0,
+            int srcX1,
+            int srcY1,
+            int dstX0,
+            int dstY0,
+            int dstX1,
+            int dstY1,
+            Attachment whatToCopy,
+            Texture::Filtering filter
+    )
+    {
+        uint32_t dstHandle = dst == nullptr ? 0 : dst->m_handle;
+        glBlitNamedFramebuffer(src->m_handle, dstHandle, srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1,
+                               GetAttachment(whatToCopy), Texture::GetFiltering(filter));
     }
 }

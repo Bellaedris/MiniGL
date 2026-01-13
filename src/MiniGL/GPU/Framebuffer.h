@@ -23,19 +23,23 @@ public:
 
         enum Attachment
         {
-            Color,
-            Depth
+            Color   = 1 << 0,
+            Depth   = 1 << 1,
+            Stencil = 1 << 2
         };
 
         static GLint GetType(Type type);
+        static GLint GetAttachment(Attachment attachment);
     #pragma endregion
 private:
+    #pragma region Members
     uint32_t m_handle;
 
     uint32_t m_width;
     uint32_t m_height;
     std::unique_ptr<Texture> m_colorTexture {nullptr};
     std::unique_ptr<Texture> m_depthTexture {nullptr};
+    #pragma endregion Members
 public:
     ~Framebuffer();
     Framebuffer(const Framebuffer&) = delete;
@@ -51,5 +55,9 @@ public:
     void Attach(Attachment attachment);
     void Bind(Type type);
     void Unbind(Type type);
+
+    #pragma region StaticMethods
+    static void BlitFramebuffer(const std::unique_ptr<Framebuffer>& src, const std::unique_ptr<Framebuffer>& dst, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1, Attachment whatToCopy, Texture::Filtering filter);
+    #pragma endregion StaticMethods
 };
 }
