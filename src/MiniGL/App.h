@@ -21,15 +21,10 @@ namespace mgl
 {
     class App
     {
-    private:
+    protected:
         #pragma region Members
         Window m_window;
 
-        gpu::Shader s;
-        gpu::Shader compute;
-        std::unique_ptr<gpu::Texture> t;
-        std::unique_ptr<gpu::Texture> m_tonemappingTexture;
-        std::unique_ptr<gpu::Framebuffer> f;
         std::vector<Mesh> m_meshes;
         std::unique_ptr<Camera> m_camera {nullptr};
 
@@ -37,19 +32,21 @@ namespace mgl
         gpu::GPUTimer m_gpuDeltaTime;
         float m_deltaTime;
 
-        // analytics
+        // analytics, debug only
+        #ifndef NDEBUG
         float m_frameTime;
         const GLubyte* vendor; // GPU vendor
         const GLubyte* gpu; // GPU model
         const GLubyte* api;
         float framerate[100] = {};
         int values_offset = 0;
+        #endif
         #pragma endregion Members
 
         /**
          * \brief Initializes the application
          */
-        void Init();
+        virtual void Init() = 0;
 
         /**
          * \brief Dear ImGui boilerplate
@@ -64,7 +61,7 @@ namespace mgl
         /**
          * \brief Called each frame, Draws to the screen
          */
-        void Render();
+        virtual void Render() = 0;
 
         /**
          * \brief Called each frame, draws ImGui UI to the screen
