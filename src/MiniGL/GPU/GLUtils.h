@@ -99,12 +99,26 @@ namespace mgl::gpu
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
+        /**
+         * \brief Enables or disables Depth testing
+         * \param value true to enable, false to disable
+         */
         static void SetDepthTesting(bool value)
         {
             if(value)
                 glEnable(GL_DEPTH_TEST);
             else
                 glDisable(GL_DEPTH_TEST);
+        }
+
+        /**
+         * \brief Changes OpenGL's render size
+         * \param width width of the new size
+         * \param height height of the new size
+         */
+        static void SetViewportSize(int width, int height)
+        {
+            glViewport(0, 0, width, height);
         }
     };
 }
