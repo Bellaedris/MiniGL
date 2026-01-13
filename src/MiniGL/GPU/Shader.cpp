@@ -126,4 +126,14 @@ namespace mgl::gpu
         }
         glDispatchCompute(x, y ,z);
     }
+
+    void Shader::Wait()
+    {
+        if(m_type != ShaderType::Compute)
+        {
+            std::cerr << "Cannot dispatch a non-compute shader\n";
+            return;
+        }
+        glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+    }
 } // mgl

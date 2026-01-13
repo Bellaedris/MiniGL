@@ -75,6 +75,11 @@ public:
      * \param z number of work groups in the Z dimension
      */
     void Dispatch(uint32_t x, uint32_t y, uint32_t z);
+
+    /**
+     * \brief Wait for a compute shader execution to finish. Does nothing on a non-compute shader
+     */
+    void Wait();
     #pragma endregion Methods
 
     #pragma region Uniform data
