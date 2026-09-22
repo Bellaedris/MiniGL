@@ -3,7 +3,7 @@
 //
 
 #include "App.h"
-#include "MiniGLConfig.h"
+#include "../MiniGLConfig.h"
 #include "GPU/Framebuffer.h"
 
 namespace mgl

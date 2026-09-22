@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.27)
 project(MiniGL VERSION 0.1)
 
+include(FetchContent)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
@@ -24,8 +26,12 @@ add_executable(MiniGL ${SOURCES})
 configure_file(MiniGLConfig.h.in ${CMAKE_SOURCE_DIR}/src/MiniGLConfig.h)
 target_include_directories(MiniGL PUBLIC "${PROJECT_BINARY_DIR}")
 
-find_package(GLM CONFIG REQUIRED)
-message(STATUS "Found GLM in ${GLM_INCLUDE_DIR}")
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY	https://github.com/g-truc/glm.git
+        GIT_TAG 	master
+)
+FetchContent_MakeAvailable(glm)
 find_package(GLFW3 REQUIRED)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 find_package(OpenMP)
