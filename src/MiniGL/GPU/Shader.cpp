@@ -8,99 +8,6 @@
 
 namespace mgl::gpu
 {
-    Shader::Shader()
-        : m_program(glCreateProgram())
-    {}
-
-    Shader::Shader(Shader &&other) noexcept
-        : m_program(other.m_program)
-    {
-        other.m_program = 0;
-    }
-
-    Shader &Shader::operator=(Shader &&other) noexcept
-    {
-        if (this != &other)
-        {
-            glDeleteProgram(m_program);
-            m_program = other.m_program;
-            other.m_program = 0;
-        }
-        return *this;
-    }
-
-    Shader::~Shader()
-    {
-        glDeleteProgram(m_program);
-    }
-
-    void Shader::AddShaderFromFile(Shader::ShaderType type, const char *path)
-    {
-        if(m_type == ShaderType::Compute)
-        {
-            std::cerr << "A compute program should only contain a compute shader\n";
-            return;
-        }
-
-        if(type == ShaderType::Compute && m_type != ShaderType::None)
-        {
-            std::cerr << "A compute program must contain a single compute shader\n";
-            return;
-        }
-
-        m_type = type;
-
-        std::optional<std::string> shaderData = utils::FileUtils::read_file(path);
-        if(shaderData.has_value() == false)
-        {
-            std::cerr << "Couldn't open file " << path << "\n";
-            return;
-        }
-
-        const char* shaderSource = shaderData->c_str();
-        unsigned int shader = glCreateShader(GetShaderType(type));
-        glShaderSource(shader, 1, &shaderSource, nullptr);
-        glCompileShader(shader);
-
-        // check for compilation errors
-        int success;
-        char infoLog[512];
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-        if (!success)
-        {
-            glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            std::cout << "error compiling shaders at " << path << ": " << infoLog << std::endl;
-        }
-
-        glAttachShader(m_program, shader);
-
-        glDeleteShader(shader);
-    }
-
-    void Shader::Create()
-    {
-        glLinkProgram(m_program);
-        int success;
-        char infoLog[512];
-        glGetShaderiv(m_program, GL_LINK_STATUS, &success);
-
-        if (!success)
-        {
-            glGetShaderInfoLog(m_program, 512, nullptr, infoLog);
-            std::cout << "error linking program: " << infoLog << std::endl;
-        }
-        else
-            m_created = true;
-    }
-
-    void Shader::Bind()
-    {
-        if(m_created == false)
-            Create();
-        glUseProgram(m_program);
-    }
-
     GLuint Shader::GetShaderType(Shader::ShaderType type)
     {
         switch(type)
@@ -117,6 +24,119 @@ namespace mgl::gpu
         }
     }
 
+    Shader::Shader()
+        : m_program(glCreateProgram())
+    {}
+
+    Shader::~Shader()
+    {
+        glDeleteProgram(m_program);
+    }
+
+    Shader::Shader(Shader &&other) noexcept
+        : m_program(other.m_program)
+    {
+        other.m_program = 0;
+    }
+
+    Shader &Shader::operator=(Shader &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteProgram(m_program);
+            m_program       = other.m_program;
+            other.m_program = 0;
+        }
+        return *this;
+    }
+
+    void Shader::AddShaderFromFile(const ShaderSource &shaderInfo)
+    {
+        if(m_type == ShaderType::Compute)
+        {
+            std::cerr << "A compute program should only contain a compute shader\n";
+            return;
+        }
+
+        if(shaderInfo.type == ShaderType::Compute && m_type != ShaderType::None)
+        {
+            std::cerr << "A compute program must contain a single compute shader\n";
+            return;
+        }
+
+        m_type = shaderInfo.type;
+
+        std::optional<std::string> shaderData = utils::FileUtils::read_file(shaderInfo.path.c_str());
+        if(shaderData.has_value() == false)
+        {
+            std::cerr << "Couldn't open file " << shaderInfo.path << "\n";
+            m_valid = false;
+            return;
+        }
+
+        const char*  shaderSource = shaderData->c_str();
+        unsigned int shader       = glCreateShader(GetShaderType(shaderInfo.type));
+        glShaderSource(shader, 1, &shaderSource, nullptr);
+        glCompileShader(shader);
+
+        // check for compilation errors
+        int  success;
+        char infoLog[512];
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+
+        if (!success)
+        {
+            glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+            std::cout << "error compiling shaders at " << shaderInfo.path << ": " << infoLog << std::endl;
+            return;
+        }
+
+        glAttachShader(m_program, shader);
+
+        glDeleteShader(shader);
+        m_shaderSources.emplace_back(shaderInfo.type, std::string(shaderInfo.path));
+    }
+
+    void Shader::Create()
+    {
+        glLinkProgram(m_program);
+        int  success;
+        char infoLog[512];
+        glGetProgramiv(m_program, GL_LINK_STATUS, &success);
+
+        if (!success)
+        {
+            glGetProgramInfoLog(m_program, 512, nullptr, infoLog);
+            std::cerr << "error linking program: " << infoLog << std::endl;
+            m_valid = false;
+        }
+        m_created = true;
+    }
+
+    void Shader::Reload()
+    {
+        glDeleteProgram(m_program);
+        m_program = glCreateProgram();
+        m_type = ShaderType::None;
+        m_uniformLocationCache.clear();
+
+        std::vector<ShaderSource> sourceToReload = m_shaderSources;
+        m_shaderSources.clear();
+        for (const ShaderSource& source : sourceToReload)
+            AddShaderFromFile(source);
+
+        Create();
+    }
+
+    void Shader::Bind()
+    {
+        if(m_created == false)
+            Create();
+        if (m_valid == false)
+            return;
+        glUseProgram(m_program);
+    }
+
     void Shader::Dispatch(uint32_t x, uint32_t y, uint32_t z)
     {
         if(m_type != ShaderType::Compute)
@@ -124,6 +144,12 @@ namespace mgl::gpu
             std::cerr << "Cannot dispatch a non-compute shader\n";
             return;
         }
+
+        if (x < 1) x = 1;
+        if (y < 1) y = 1;
+        if (z < 1) z = 1;
+
+        // ensure we do not dispatch < 1 on all dimensions
         glDispatchCompute(x, y ,z);
     }
 
@@ -131,7 +157,7 @@ namespace mgl::gpu
     {
         if(m_type != ShaderType::Compute)
         {
-            std::cerr << "Cannot dispatch a non-compute shader\n";
+            std::cerr << "Cannot call Wait() on a non-compute shader\n";
             return;
         }
         glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);

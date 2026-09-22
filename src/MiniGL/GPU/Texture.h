@@ -18,8 +18,8 @@ namespace mgl::gpu
  */
 class Texture
 {
-    #pragma region Enums
 public:
+#pragma region Enums
     /**
      * \brief Different texture targets we can bind to. We only handle 2D textures and Cubemaps for now. @see
      */
@@ -61,9 +61,9 @@ public:
         RGBA,
         SRGB
     };
-    #pragma endregion Enums
+#pragma endregion Enums
 
-    #pragma region EnumAccessFunctions
+#pragma region EnumAccessFunctions
     static GLint GetTextureTarget(TextureTarget target);
     static GLint GetWrapMode(WrapMode mode);
     static GLint GetFiltering(Filtering filter);
@@ -71,8 +71,27 @@ public:
     static GLint GetPixelInternalFormat(PixelFormat format, GLUtils::DataType type);
     static GLint GetPixelFormat(PixelFormat format);
     static GLint GetImageFormat(PixelFormat format);
-    #pragma endregion EnumAccessFunctions
+#pragma endregion EnumAccessFunctions
+#pragma region Structs
+    /**
+     * \brief The minimal parameters required to build a texture.
+     */
+    struct TextureDesc
+    {
+        TextureTarget target;
+        int width;
+        int height;
+        PixelFormat format;
+        GLUtils::DataType dataType;
+        Filtering minFilter {LinearMipMapLinear};
+        Filtering magFilter {Linear};
+        WrapMode wrapMode {WrapMode::Repeat};
+    };
+#pragma endregion Structs
 private:
+#pragma region Members
+    /** \brief relative path to the texture. Only used for textures loaded from files, textures created at runtime have a blank path */
+    std::string m_path;
 
     uint32_t m_handle {0};
 
@@ -83,8 +102,10 @@ private:
     Filtering m_minFilter {Filtering::LinearMipMapLinear};
     Filtering m_magFilter {Filtering::Linear};
     PixelFormat m_format {};
+    GLUtils::DataType m_dataType {};
+#pragma endregion Members
 public:
-    Texture(TextureTarget target);
+    Texture(const TextureDesc& desc);
     Texture(TextureTarget target, const char* path, bool generateMipmaps);
     ~Texture();
 
@@ -99,6 +120,21 @@ public:
     void Bind(uint32_t unit);
     void BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access);
     void Allocate(PixelFormat format, GLUtils::DataType dataType);
+
+    /**
+     * \brief Allocate storage for a number of mipmaps. This should be done on allocated textures. Once the mips have been
+     * allocated, the texture will be considered final and CANNOT be resized.
+     * Useful to build a mip chain.
+     * \param levels number of mip levels that we want to allocate. When requesting a level n, it is possible that some mips
+     * will have a size < 1. In that case, the function will allocate the maximal number of integer size mips.
+     */
+    void AllocateMipmapsStorage(int levels);
+
+    /**
+     * \brief Allocate the memory again, using the same formats and data types, but to take into account any change
+     * that could've happened in between.
+     */
+    void Reallocate();
     void Write(void* data, PixelFormat format, GLUtils::DataType dataType);
 
     void SetMinFilter(Filtering filter);
@@ -106,5 +142,8 @@ public:
     void SetWrapMode(WrapMode mode);
     void SetBorderColor(const glm::vec4& color);
     void SetSize(int width, int height);
+
+    glm::ivec2 Size() const { return {m_width, m_height}; };
+    std::string Path() const { return m_path; }
 };
 } // mgl

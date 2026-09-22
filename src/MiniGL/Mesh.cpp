@@ -130,10 +130,10 @@ namespace mgl
     {
         m_vao.Bind();
         m_buffer.Bind();
-        m_buffer.Write(sizeof(VertexData) * m_verticesData.size(), m_verticesData.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
+        m_buffer.Write(sizeof(VertexData) * m_verticesData.size(), m_verticesData.data(), gpu::Buffer::BufferUsage::StaticDraw);
 
         m_indexBuffer.Bind();
-        m_indexBuffer.Write(sizeof(uint32_t) * m_indices.size(), m_indices.data(), gpu::Buffer::BufferUsage::STATIC_DRAW);
+        m_indexBuffer.Write(sizeof(uint32_t) * m_indices.size(), m_indices.data(), gpu::Buffer::BufferUsage::StaticDraw);
 
         m_vao.SetAttribute(0, gpu::GLUtils::DataType::Float, 0, 3, sizeof(VertexData)); // positions
         m_vao.SetAttribute(1, gpu::GLUtils::DataType::Float, offsetof(VertexData, normal), 3, sizeof(VertexData)); // normals

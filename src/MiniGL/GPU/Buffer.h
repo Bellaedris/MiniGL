@@ -24,7 +24,8 @@ public:
     enum BufferType
     {
         Vertex,
-        Index
+        Index,
+        Uniform
     };
 
     /**
@@ -34,15 +35,15 @@ public:
      */
     enum BufferUsage
     {
-        STATIC_DRAW,
-        STATIC_READ,
-        STATIC_COPY,
-        DYNAMIC_DRAW,
-        DYNAMIC_READ,
-        DYNAMIC_COPY,
-        STREAM_DRAW,
-        STREAM_READ,
-        STREAM_COPY
+        StaticDraw,
+        StaticRead,
+        StaticCopy,
+        DynamicDraw,
+        DynamicRead,
+        DynamicCopy,
+        StreamDraw,
+        StreamRead,
+        StreamCopy
     };
     #pragma endregion Enum
 
@@ -85,13 +86,18 @@ public:
     void Bind() const;
 
     /**
+     * \brief binds the buffer to an indexed target. Only available for Uniform Buffers.
+     */
+    void Bind(uint32_t index) const;
+
+    /**
      * \brief Populate a buffer with data. The buffer must be bound beforehand using the Bind() method
      * \param size Size of the data to allocate
      * \param data pointer to the data to allocate
      * \param usage How the data will be used. This is a hint and only helps the driver speedup things.
      * See BufferUsage for more detailed informations.
      */
-    void Write(uint32_t size, void* data, BufferUsage usage);
+    void Write(uint32_t size, void* data, BufferUsage usage) const;
     #pragma endregion Methods
 };
 } // mgl::gpu
