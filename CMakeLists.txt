@@ -10,8 +10,10 @@ set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
-# fix for a weird bug that caused windows.h to expand "max" and "min" keywords into macros.
-add_definitions(-DNOMINMAX)
+# Using windows.h will expand "max" and "min" keywords into macros, making std::min/max unusable
+if(WIN32)
+    add_definitions(-DNOMINMAX)
+endif()
 
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 

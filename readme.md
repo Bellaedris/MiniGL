@@ -1,7 +1,11 @@
 A minimalist OpenGL engine to quickly iterate on rendering concepts. it was created to help Lyon 2 University Gamagora students learn openGL, without having to suffer the initialization work.
 
 ## Installation and build
-MINIGL IS WINDOWS ONLY FOR NOW. FEEL FREE TO CONTRIBUTE TO HANDLE LINUX BUILDS.
+Building on different platforms might not work sometimes. It has been tested on:
+- Windows (MSVC22)
+- Ubuntu and derived (Zorin/Neon)
+
+Feel free to either open a ticket or contact me in case of issue
 
 ## Functionalities
 - The main entry point is the App class, that creates a window
@@ -10,6 +14,6 @@ MINIGL IS WINDOWS ONLY FOR NOW. FEEL FREE TO CONTRIBUTE TO HANDLE LINUX BUILDS.
 - Simple Camera OK
 - Textures OK
 - ImGui OK
-- Framebuffers TODO
+- Framebuffers OK
 - Cubemaps TODO
 - Materials TODO
