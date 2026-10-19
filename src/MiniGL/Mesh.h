@@ -20,6 +20,9 @@ class Mesh
 {
 public:
     #pragma region structs
+    /**
+     * Our meshes store 3 data: positions, normals and texture coordinates
+     */
     struct VertexData
     {
         glm::vec3 pos {};
@@ -46,25 +49,42 @@ public:
 
 private:
     #pragma region Members
-    /* TODO read vertexData, write these data into separate per-component vectors, then rebuild a vertexData array when
-     these data change. This will allow a better flexibility and also allow us to efficiently build our buffer when
-     read objects have different input datas (for instance, no normals or UVs)
+    /* TODO Right now, we delete the vertices after they are sent to the GPU since we don't want duplicated datas.
+     * Some people might prefer to keep them CPU-side as well and recall SetupGPU() afterwards, others may want to have both by
+     * reading vertexData from GPU, write these data into separate per-component vectors, then rebuild a vertexData array when
+     these data change, kind of what unity API has.
+     */
+
+    /**
+     * We store an array of vertex data, and an array of indices, since most 3D objects come in indexed form
      */
     std::vector<VertexData> m_verticesData;
     std::vector<uint32_t> m_indices;
 
+    /** \brief Buffers that will store vertices and indices data */
     gpu::Buffer m_buffer, m_indexBuffer;
     gpu::Vao m_vao;
     #pragma endregion Members
 public:
+    /**
+     * Construct a mesh from an obj file.
+     * @param filename path to the obj file
+     */
     Mesh(const char* filename);
+
+    /**
+     * Construct a mesh from an array of vertices and indices. Allows to create meshes by hand, without reading an obj
+     * @param vertices array of vertices
+     * @param indices array of indices
+     */
     Mesh(std::vector<VertexData>& vertices, std::vector<uint32_t>& indices);
 
-    void RecalculateNormals();
+    /**
+     * Sets up our buffer datas, their VAO and sends them to the GPU
+     */
     void SetupGPU();
 
     void Draw() const;
-    void DrawUnindexed();
 
     #pragma region Static helpers
     static Mesh GeneratePlane(float halfSize);

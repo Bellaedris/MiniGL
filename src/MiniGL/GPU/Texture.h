@@ -21,7 +21,7 @@ class Texture
 public:
 #pragma region Enums
     /**
-     * \brief Different texture targets we can bind to. We only handle 2D textures and Cubemaps for now. @see
+     * \brief Different texture targets we can bind to. We only handle 2D textures for now.
      */
     enum TextureTarget
     {
@@ -41,6 +41,9 @@ public:
         ClampToBorder
     };
 
+    /**
+     * How to filter the pixels when sampling the texture.
+     */
     enum Filtering
     {
         Nearest,
@@ -51,6 +54,9 @@ public:
         LinearMipMapLinear
     };
 
+    /**
+     * \brief What kind of data this texture holds
+     */
     enum PixelFormat
     {
         DepthComponent,
@@ -73,8 +79,9 @@ public:
     static GLint GetImageFormat(PixelFormat format);
 #pragma endregion EnumAccessFunctions
 #pragma region Structs
+
     /**
-     * \brief The minimal parameters required to build a texture.
+     * \brief The parameters required to build a texture. it would be very ugly to put all these as parameters in the constructor so they're in a struct.
      */
     struct TextureDesc
     {
@@ -115,16 +122,32 @@ public:
     Texture(Texture&& other) noexcept;
     Texture& operator=(Texture&& other) noexcept;
 
+    /** \brief returns the ID of this texture. */
     [[nodiscard]] inline uint32_t Handle() {return m_handle; };
+    /** \brief sets the texture as active, on whatever texture unit is selected at the moment */
     void Bind();
+    /** \brief sets the texture as active on a specified texture unit \param unit the texture unit we bind this texture to*/
     void Bind(uint32_t unit);
+    /**
+     * \brief Sometimes, we don't need the whole texture with its mipmaps. This function will bind a single mip level of the texture to the specified texture unit.
+     * The object we map won't be a sampler2D but an image2D. This is especially useful for compute shaders, since we can't write to a sampler2D, we need an image. see the tonemap.comp shader for an example.
+     * @param unit texture unit to bind the mip level to
+     * @param mipLevel element of the mip chain to bind. 0 is the full size texture, and each successive mip level will divide the size by 2.
+     * @param access Will we only read to the image? Write to it? Both?
+     */
     void BindImage(uint32_t unit, uint32_t mipLevel, GLUtils::Access access);
+
+    /**
+     * Allocate the Texture to the GPU without giving it any data. Very useful for textures that will be given to framebuffers, for instance.
+     * @param format format of the texture
+     * @param dataType Data type of each pixel
+     */
     void Allocate(PixelFormat format, GLUtils::DataType dataType);
 
     /**
      * \brief Allocate storage for a number of mipmaps. This should be done on allocated textures. Once the mips have been
      * allocated, the texture will be considered final and CANNOT be resized.
-     * Useful to build a mip chain.
+     * Useful to build a mip chain by hand.
      * \param levels number of mip levels that we want to allocate. When requesting a level n, it is possible that some mips
      * will have a size < 1. In that case, the function will allocate the maximal number of integer size mips.
      */
@@ -135,6 +158,13 @@ public:
      * that could've happened in between.
      */
     void Reallocate();
+
+    /**
+     * Allocate a texture while also filling its data with an input
+     * @param data pointer to pixel data. If the data sent do not match with format/datatype, the behaviour is undefined.
+     * @param format format of the texture
+     * @param dataType Type of the pixels
+     */
     void Write(void* data, PixelFormat format, GLUtils::DataType dataType);
 
     void SetMinFilter(Filtering filter);

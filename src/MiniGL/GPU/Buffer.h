@@ -19,7 +19,7 @@ class Buffer
     #pragma region Enum
 public:
     /**
-     * \brief What we are storing in a buffer: vertices, indices
+     * \brief What we are storing in a buffer: vertices, indices, Uniforms
      */
     enum BufferType
     {
@@ -86,7 +86,7 @@ public:
     void Bind() const;
 
     /**
-     * \brief binds the buffer to an indexed target. Only available for Uniform Buffers.
+     * \brief binds the buffer to an indexed target to be used in a shader. Only available for Uniform Buffers.
      */
     void Bind(uint32_t index) const;
 

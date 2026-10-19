@@ -13,10 +13,19 @@
 
 namespace mgl::gpu
 {
+/**
+ * \brief Creates, compiles and link shader code than will be run on the GPU
+ */
 class Shader
 {
 public:
     #pragma region Enum
+    /**
+     * \brief There are 3 supported programmable shader types: Vertex shaders run on all vertices to transform them,
+     * Fragment shades individual framents and compute are independant from the rendering pipeline and allow to do very fast computation,
+     * operations on images, and much more.
+     * Geometry and Tesselations shaders aren't supported yet.
+     */
     enum ShaderType
     {
         Vertex,
@@ -27,6 +36,9 @@ public:
     #pragma endregion Enum
 
     #pragma region Struct
+    /**
+     * \brief Describes a shader source code: what type of shader it is and where is the source code located.
+     */
     struct ShaderSource
     {
         ShaderType type;
@@ -42,6 +54,7 @@ private:
     ShaderType m_type {ShaderType::None};
 
     std::vector<ShaderSource> m_shaderSources;
+    /** \brief we can cache uniform locations to not query them each frame */
     std::map<std::string, int> m_uniformLocationCache;
     #pragma endregion Members
 
@@ -106,7 +119,7 @@ public:
         return glGetUniformLocation(m_program, name.c_str());
     }
 
-    void UniformData(const std::string& name, const glm::mat4 mat) const
+    void UniformData(const std::string& name, const glm::mat4& mat) const
     {
         glUniformMatrix4fv(GetLocation(name), 1, false, glm::value_ptr(mat));
     }

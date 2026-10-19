@@ -20,7 +20,9 @@ namespace mgl::gpu
     concept chrono_duration = is_chrono_duration<_Tp>::value;
 
     /**
-     * \brief Inspired by a video of TheCherno, just a quick utility to wrap timers
+     * \brief Inspired an implementation by TheCherno, just a quick utility to wrap timers. Templated so you can use any chrono-derived types
+     * described here: https://en.cppreference.com/cpp/chrono/duration
+     * Using a type that is not in this list will not compile, thanks to a concept defined above.
      */
     template<chrono_duration T>
     class Timer
@@ -59,15 +61,38 @@ namespace mgl::gpu
     {
     private:
         uint32_t m_query {0};
-        int64_t m_timer {0};
+        GLint64 m_timer {0};
+        GLint m_available {false};
     public:
         GPUTimer() { glGenQueries(1, &m_query); };
+        GPUTimer(const GPUTimer&) = delete;
+        GPUTimer& operator=(const GPUTimer&) = delete;
+
+        GPUTimer(GPUTimer&& other) noexcept : m_query(other.m_query), m_timer(other.m_timer), m_available(other.m_available)
+        {
+            other.m_query = 0;
+        };
+
+        GPUTimer& operator=(GPUTimer&& other)
+        {
+            if (this != &other)
+            {
+                glDeleteQueries(1, &m_query);
+                m_query = other.m_query;
+                m_timer = other.m_timer;
+                m_available = other.m_available;
+                other.m_query = 0;
+            }
+
+            return *this;
+        }
 
         /**
          * \brief Creates an OpenGL query to measure time
          */
-        void Begin() const
+        void Begin()
         {
+            m_available = 0;
             glBeginQuery(GL_TIME_ELAPSED, m_query);
         }
 
@@ -86,6 +111,9 @@ namespace mgl::gpu
          */
         uint64_t Elapsed()
         {
+            while (!m_available)
+                glGetQueryObjectiv(m_query, GL_QUERY_RESULT_AVAILABLE, &m_available);
+
             glGetQueryObjecti64v(m_query, GL_QUERY_RESULT, &m_timer); // stall the CPU
             return m_timer;
         }

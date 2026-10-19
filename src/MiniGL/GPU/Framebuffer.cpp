@@ -47,7 +47,7 @@ void Framebuffer::Attach(Attachment attachment, const std::shared_ptr<Texture>& 
 
         if (attachment == Depth)
         {
-            // depth attachment
+            // create a depth attachment
            texture->SetWrapMode(Texture::ClampToBorder);
            texture->SetBorderColor({1., 1., 1., 1.});
             glNamedFramebufferTexture(m_handle, GL_DEPTH_ATTACHMENT, texture->Handle(), 0);

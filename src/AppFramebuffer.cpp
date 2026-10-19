@@ -1,10 +1,11 @@
 #include "MiniGL/App.h"
 
-class AppTest : public mgl::App
+class AppFramebuffer : public mgl::App
 {
 public:
-    AppTest(int width, int height) : App(width, height, 4, 6) {};
+    AppFramebuffer(int width, int height) : App(width, height, 4, 6) {};
 
+protected:
     void Init() override
     {
         // initialize what needs to be rendered here
@@ -105,7 +106,7 @@ public:
 
         mgl::gpu::Framebuffer::Attachment whatToCopy = mgl::gpu::Framebuffer::Attachment::Color;
         mgl::gpu::Framebuffer::BlitFramebuffer(f, nullptr, 0, 0, 1360, 768, 0, 0, 1360, 768, whatToCopy, mgl::gpu::Texture::Filtering::Linear);
-        m_gpuDeltaTime.Begin();
+        m_gpuDeltaTime.End();
     }
 
 private:
@@ -118,8 +119,4 @@ private:
     std::unique_ptr<mgl::gpu::Framebuffer> f;
 };
 
-int main()
-{
-    AppTest app(1360, 768);
-    app.Run();
-}
+

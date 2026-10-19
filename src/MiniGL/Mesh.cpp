@@ -113,19 +113,6 @@ namespace mgl
         m_vao.Unbind();
     }
 
-    void Mesh::DrawUnindexed()
-    {
-
-    }
-
-    void Mesh::RecalculateNormals()
-    {
-        for(int i = 0; i < m_indices.size(); i++)
-        {
-
-        }
-    }
-
     void Mesh::SetupGPU()
     {
         m_vao.Bind();
