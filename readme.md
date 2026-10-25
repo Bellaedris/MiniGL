@@ -4,6 +4,13 @@ A minimalist OpenGL engine to quickly iterate on rendering concepts. it was crea
 Building on different platforms might not work sometimes. It has been tested on:
 - Ubuntu and derived (ZorinOS/KDE Neon)
 
+### Windows
+It has only been tested on Visual Studio 2026 so far, open the folder, wait for CMake to run, you should be able to launch the project right away
+
+### Linux
+You will need to install the following dependencies (for Debian-derived packages, unfortunately i don't know the names in other package managers): `build-essential cmake libglfw3-dev libomp-dev`
+Just `cmake .` at the project root, then build depending on you setup... Probably something lie `make` or `ninja`. 
+
 If it compiles on a platform not present in this list, feel free to tell me.
 
 Feel free to either open a ticket or contact me in case of issue
