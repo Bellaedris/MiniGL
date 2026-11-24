@@ -133,10 +133,10 @@ namespace mgl
     {
         std::vector<VertexData> vertices =
         {
-            {{-halfSize, 0, halfSize}, {0, 1, 0}, {0.0f, 1.0f}},
-            {{-halfSize, 0, -halfSize}, {0, 1, 0}, {0.0f, 0.0f}},
-            {{halfSize, 0, halfSize}, {0, 1, 0}, {1.0f, 1.0f}},
-            {{halfSize, 0, -halfSize}, {0, 1, 0}, {1.0f, 0.0f}}
+            {{-halfSize, halfSize, 0}, {0, 1, 0}, {0.0f, 1.0f}},
+            {{-halfSize, -halfSize, 0}, {0, 1, 0}, {0.0f, 0.0f}},
+            {{halfSize, halfSize, 0}, {0, 1, 0}, {1.0f, 1.0f}},
+            {{halfSize, -halfSize, 0}, {0, 1, 0}, {1.0f, 0.0f}}
         };
 
         std::vector<uint32_t> indices =

@@ -11,6 +11,7 @@ protected:
         // initialize what needs to be rendered here
         // camera
         m_camera = std::make_unique<mgl::Camera>(glm::vec3(0, 0, 0), m_window.AspectRatio(), 70.f, .01f, 1000.f);
+        screen = std::make_unique<mgl::Mesh>(mgl::Mesh::GeneratePlane(1.));
 
         // create a framebuffer and its attachments
         f = std::make_unique<mgl::gpu::Framebuffer>(m_window.Width(), m_window.Height());
@@ -21,7 +22,7 @@ protected:
             .height = m_window.Height(),
             .format = mgl::gpu::Texture::PixelFormat::RGBA,
             .dataType = mgl::gpu::GLUtils::DataType::Float,
-            .minFilter = mgl::gpu::Texture::Filtering::LinearMipMapLinear,
+            .minFilter = mgl::gpu::Texture::Filtering::Linear,
             .magFilter = mgl::gpu::Texture::Filtering::Linear,
             .wrapMode = mgl::gpu::Texture::WrapMode::ClampToEdge
         };
@@ -52,6 +53,10 @@ protected:
         compute.AddShaderFromFile(mgl::gpu::Shader::ShaderSource(mgl::gpu::Shader::Compute, "shaders/tonemap.comp"));
         compute.Create();
 
+        postProcess.AddShaderFromFile(mgl::gpu::Shader::ShaderSource(mgl::gpu::Shader::Vertex, "shaders/postProcess.vert"));
+        postProcess.AddShaderFromFile(mgl::gpu::Shader::ShaderSource(mgl::gpu::Shader::Fragment, "shaders/postProcess.frag"));
+        postProcess.Create();
+
         // meshes to draw
         m_meshes.push_back(std::move(mgl::Mesh("resources/models/backpack.obj")));
         m_meshes.push_back(std::move(mgl::Mesh::GeneratePlane(1.f)));
@@ -64,7 +69,7 @@ protected:
             .height = m_window.Height(),
             .format = mgl::gpu::Texture::PixelFormat::RGBA,
             .dataType = mgl::gpu::GLUtils::DataType::UnsignedByte,
-            .minFilter = mgl::gpu::Texture::Filtering::LinearMipMapLinear,
+            .minFilter = mgl::gpu::Texture::Filtering::Linear,
             .magFilter = mgl::gpu::Texture::Filtering::Linear,
             .wrapMode = mgl::gpu::Texture::WrapMode::ClampToBorder
         };
@@ -77,13 +82,12 @@ protected:
     void Render() override
     {
         m_gpuDeltaTime.Begin();
-        // clear the framebuffer
-        mgl::gpu::GLUtils::Clear();
 
         // Render the frame
-        f->Bind(mgl::gpu::Framebuffer::Type::Write);
-        mgl::gpu::GLUtils::SetDepthTesting(true);
+        f->Bind(mgl::gpu::Framebuffer::Type::ReadWrite);
+        // clear the framebuffer
         mgl::gpu::GLUtils::Clear();
+        mgl::gpu::GLUtils::SetDepthTesting(true);
 
         s.Bind();
         s.UniformData("viewMatrix", m_camera->View());
@@ -92,31 +96,41 @@ protected:
         s.UniformData("albedo", 0);
         for(const auto& mesh : m_meshes)
             mesh.Draw();
+        f->Unbind(mgl::gpu::Framebuffer::Type::ReadWrite);
+        mgl::gpu::GLUtils::Clear();
 
         // post processing
         compute.Bind();
         m_tonemappingTexture->BindImage(0, 0, mgl::gpu::GLUtils::Write);
+        m_colorTexture->Bind(1);
         compute.UniformData("framebuffer", 1);
 
-        compute.Dispatch(1360, 768, 1);
+        compute.Dispatch(m_window.Width(), m_window.Height(), 1);
         compute.Wait();
 
-        f->Unbind(mgl::gpu::Framebuffer::Type::ReadWrite);
-        mgl::gpu::GLUtils::SetViewportSize(1360, 768);
+        mgl::gpu::GLUtils::SetViewportSize(m_window.Width(), m_window.Height());
+        // blit to screen
+        postProcess.Bind();
+        m_tonemappingTexture->Bind(0);
+        postProcess.UniformData("framebuffer", 0);
+        screen->Draw();
 
-        mgl::gpu::Framebuffer::Attachment whatToCopy = mgl::gpu::Framebuffer::Attachment::Color;
-        mgl::gpu::Framebuffer::BlitFramebuffer(f, nullptr, 0, 0, 1360, 768, 0, 0, 1360, 768, whatToCopy, mgl::gpu::Texture::Filtering::Linear);
+        // mgl::gpu::Framebuffer::Attachment whatToCopy = mgl::gpu::Framebuffer::Attachment::Color;
+        // mgl::gpu::Framebuffer::BlitFramebuffer(f, nullptr, 0, 0, 1360, 768, 0, 0, 1360, 768, whatToCopy, mgl::gpu::Texture::Filtering::Linear);
         m_gpuDeltaTime.End();
     }
 
 private:
     mgl::gpu::Shader s;
     mgl::gpu::Shader compute;
+    mgl::gpu::Shader postProcess;
     std::unique_ptr<mgl::gpu::Texture> t;
     std::shared_ptr<mgl::gpu::Texture> m_colorTexture;
     std::shared_ptr<mgl::gpu::Texture> m_depthTexture;
     std::unique_ptr<mgl::gpu::Texture> m_tonemappingTexture;
     std::unique_ptr<mgl::gpu::Framebuffer> f;
+
+    std::unique_ptr<mgl::Mesh> screen{};
 };
 
 
